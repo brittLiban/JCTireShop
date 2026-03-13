@@ -7,6 +7,8 @@
 # Dependencies — anywhere in the repo
 node_modules/
 **/node_modules/
+.bin/
+**/.bin/
 
 # Next.js build output
 .next/
