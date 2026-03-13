@@ -1,0 +1,32 @@
+# Environment variables - NEVER commit these
+.env
+.env.local
+.env.production
+
+# Dependencies
+app/node_modules/
+
+# Next.js build output
+app/.next/
+
+# Prisma generated client
+app/node_modules/.prisma/
+
+# SSL certificates (managed by certbot on the server)
+certbot/
+
+# Docker volumes & data
+pgdata/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
