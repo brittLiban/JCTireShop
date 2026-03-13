@@ -37,5 +37,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Run migrations with the pinned local CLI, then start the server
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node server.js"]
+# Push schema to DB (idempotent, no migration files needed), then start
+CMD ["sh", "-c", "./node_modules/.bin/prisma db push --skip-generate --accept-data-loss && node server.js"]
