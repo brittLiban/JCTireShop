@@ -2,15 +2,19 @@
 .env
 .env.local
 .env.production
+.env*.local
 
-# Dependencies
-app/node_modules/
+# Dependencies — anywhere in the repo
+node_modules/
+**/node_modules/
 
 # Next.js build output
-app/.next/
+.next/
+**/.next/
+out/
 
-# Prisma generated client
-app/node_modules/.prisma/
+# Prisma generated engines
+**/.prisma/
 
 # SSL certificates (managed by certbot on the server)
 certbot/
@@ -21,12 +25,16 @@ pgdata/
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Editor
 .vscode/
 .idea/
 *.swp
+*.swo
