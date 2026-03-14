@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, X, Pencil, Trash2, AlertTriangle, Package } from 'lucide-react'
+import { Plus, X, Pencil, Trash2, AlertTriangle, Package, DollarSign, TrendingUp, BarChart2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
 
@@ -148,43 +148,81 @@ export default function InventoryPage() {
   )
 
   const lowStockCount = tires.filter((t) => t.quantity <= 4).length
+  const fmt = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+  // Analytics
+  const totalUnits   = tires.reduce((s, t) => s + t.quantity, 0)
+  const totalCostVal = tires.reduce((s, t) => s + parseFloat(t.cost)  * t.quantity, 0)
+  const totalRetail  = tires.reduce((s, t) => s + parseFloat(t.price) * t.quantity, 0)
+  const grossMargin  = totalRetail - totalCostVal
+  const marginPct    = totalRetail > 0 ? (grossMargin / totalRetail) * 100 : 0
+
+  // Top brand by units
+  const brandMap: Record<string, number> = {}
+  tires.forEach((t) => { brandMap[t.brand] = (brandMap[t.brand] ?? 0) + t.quantity })
+  const topBrand = Object.entries(brandMap).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—'
 
   return (
-    <div>
-      <div className="flex items-start justify-between mb-8 gap-4">
+    <div className="space-y-6">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-brand-dark">Inventory</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {tires.length} SKU{tires.length !== 1 ? 's' : ''} tracked
+            {tires.length} SKU{tires.length !== 1 ? 's' : ''} · {totalUnits} units
             {lowStockCount > 0 && (
-              <span className="ml-2 text-red-500 font-medium">
-                · {lowStockCount} low stock
-              </span>
+              <span className="ml-2 text-red-500 font-medium">· {lowStockCount} low stock</span>
             )}
           </p>
         </div>
-        <button onClick={openAdd} className="btn-primary flex-shrink-0">
+        <button type="button" onClick={openAdd} className="btn-primary flex-shrink-0">
           <Plus size={16} /> Add Tire
         </button>
       </div>
 
-      {/* Search */}
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search by brand or model..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="admin-input max-w-xs"
-        />
+      {/* Analytics strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { icon: Package,    label: 'Total Units',    value: totalUnits.toString(),         color: 'bg-blue-50 text-blue-600' },
+          { icon: DollarSign, label: 'Cost Value',     value: `$${fmt(totalCostVal)}`,       color: 'bg-purple-50 text-purple-600' },
+          { icon: TrendingUp, label: 'Retail Value',   value: `$${fmt(totalRetail)}`,        color: 'bg-emerald-50 text-emerald-600' },
+          { icon: BarChart2,  label: `Margin (${marginPct.toFixed(0)}%)`, value: `$${fmt(grossMargin)}`, color: grossMargin > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600' },
+        ].map(({ icon: Icon, label, value, color }) => (
+          <div key={label} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${color}`}>
+              <Icon size={15} />
+            </div>
+            <p className="text-lg font-black text-brand-dark leading-tight">{value}</p>
+            <p className="text-gray-400 text-xs mt-0.5">{label}</p>
+          </div>
+        ))}
       </div>
+
+      {/* Top brand badge */}
+      {topBrand !== '—' && (
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <span className="bg-brand-red/10 text-brand-red text-xs font-bold px-2.5 py-1 rounded-full">
+            Top Brand
+          </span>
+          <span className="font-medium text-brand-dark">{topBrand}</span>
+          <span>— {brandMap[topBrand]} units in stock</span>
+        </div>
+      )}
+
+      {/* Search */}
+      <input
+        type="text"
+        placeholder="Search by brand or model..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="admin-input max-w-xs"
+      />
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                {['Brand', 'Model', 'Size', 'Qty', 'Cost', 'Price', 'Notes', ''].map((h) => (
+                {['Brand', 'Model', 'Size', 'Qty', 'Cost', 'Price', 'Margin', 'Notes', ''].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap"
@@ -230,12 +268,25 @@ export default function InventoryPage() {
                     <td className="px-4 py-3 font-semibold text-brand-dark">
                       ${parseFloat(t.price).toFixed(2)}
                     </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {(() => {
+                        const margin = parseFloat(t.price) - parseFloat(t.cost)
+                        const pct = parseFloat(t.price) > 0 ? (margin / parseFloat(t.price)) * 100 : 0
+                        const color = pct >= 20 ? 'text-emerald-600' : pct >= 10 ? 'text-yellow-600' : 'text-red-500'
+                        return (
+                          <span className={`text-xs font-bold ${color}`}>
+                            +${margin.toFixed(2)} <span className="font-normal text-gray-400">({pct.toFixed(0)}%)</span>
+                          </span>
+                        )
+                      })()}
+                    </td>
                     <td className="px-4 py-3 text-gray-400 max-w-[140px]">
                       <span className="truncate block">{t.notes || '—'}</span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         <button
+                          type="button"
                           onClick={() => openEdit(t)}
                           className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"
                           aria-label="Edit tire"
@@ -243,6 +294,7 @@ export default function InventoryPage() {
                           <Pencil size={13} />
                         </button>
                         <button
+                          type="button"
                           onClick={() => deleteTire(t.id, `${t.brand} ${t.model}`)}
                           className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-brand-red transition-colors"
                           aria-label="Delete tire"

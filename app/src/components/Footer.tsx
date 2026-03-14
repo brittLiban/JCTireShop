@@ -1,14 +1,21 @@
+'use client'
+
 import Link from 'next/link'
 import { Phone, Mail, MapPin, Clock } from 'lucide-react'
-
-const quickLinks = [
-  { href: '#services', label: 'Services' },
-  { href: '#testimonials', label: 'Reviews' },
-  { href: '#schedule', label: 'Book Appointment' },
-  { href: '#contact', label: 'Contact Us' },
-]
+import { useLanguage } from '@/contexts/LanguageContext'
+import { translations } from '@/lib/translations'
 
 export default function Footer() {
+  const { lang } = useLanguage()
+  const t = translations[lang].footer
+
+  const quickLinks = [
+    { href: '#services', label: t.links.services },
+    { href: '#testimonials', label: t.links.reviews },
+    { href: '#schedule', label: t.links.book },
+    { href: '#contact', label: t.links.contact },
+  ]
+
   return (
     <footer className="bg-brand-dark text-gray-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10">
@@ -22,16 +29,13 @@ export default function Footer() {
               </div>
               <span className="text-white font-bold text-base">JC Tire Shop</span>
             </div>
-            <p className="text-sm leading-relaxed">
-              Your trusted local tire experts. Quality service, fair prices,
-              and honest work — every single time.
-            </p>
+            <p className="text-sm leading-relaxed">{t.tagline}</p>
           </div>
 
           {/* Quick links */}
           <div>
             <h4 className="text-white font-semibold text-sm mb-5 uppercase tracking-wider">
-              Quick Links
+              {t.quickLinks}
             </h4>
             <ul className="space-y-3 text-sm">
               {quickLinks.map(({ href, label }) => (
@@ -51,7 +55,7 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <h4 className="text-white font-semibold text-sm mb-5 uppercase tracking-wider">
-              Contact
+              {t.contactTitle}
             </h4>
             <ul className="space-y-4 text-sm">
               <li className="flex items-center gap-3">
@@ -76,28 +80,28 @@ export default function Footer() {
           {/* Hours */}
           <div>
             <h4 className="text-white font-semibold text-sm mb-5 uppercase tracking-wider">
-              Hours
+              {t.hoursTitle}
             </h4>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-3">
                 <Clock size={14} className="text-brand-red flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-white font-medium">Mon – Friday</p>
-                  <p>8:00 AM – 6:00 PM</p>
+                  <p className="text-white font-medium">{t.hours.weekdays}</p>
+                  <p>{t.hours.weekdayTime}</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <Clock size={14} className="text-brand-red flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-white font-medium">Saturday</p>
-                  <p>8:00 AM – 4:00 PM</p>
+                  <p className="text-white font-medium">{t.hours.saturday}</p>
+                  <p>{t.hours.saturdayTime}</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <Clock size={14} className="text-gray-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-gray-600 font-medium">Sunday</p>
-                  <p className="text-gray-600">Closed</p>
+                  <p className="text-gray-600 font-medium">{t.hours.sunday}</p>
+                  <p className="text-gray-600">{t.hours.sundayTime}</p>
                 </div>
               </li>
             </ul>
@@ -107,12 +111,12 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs">
-          <p>© {new Date().getFullYear()} JC Tire Shop. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {t.copyright}</p>
           <Link
             href="/admin/login"
             className="hover:text-white transition-colors opacity-40 hover:opacity-100"
           >
-            Staff Login
+            {t.staffLogin}
           </Link>
         </div>
       </div>

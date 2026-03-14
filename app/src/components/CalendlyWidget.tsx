@@ -3,16 +3,20 @@
 import { motion, useInView } from 'framer-motion'
 import { useRef, useEffect } from 'react'
 import { Calendar, Clock, CheckCircle } from 'lucide-react'
-
-const perks = [
-  { icon: Clock, text: 'Pick your preferred date & time' },
-  { icon: CheckCircle, text: 'Instant confirmation sent to your email' },
-  { icon: Calendar, text: 'Easy to reschedule if plans change' },
-]
+import { useLanguage } from '@/contexts/LanguageContext'
+import { translations } from '@/lib/translations'
 
 export default function CalendlyWidget() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
+  const { lang } = useLanguage()
+  const t = translations[lang].calendly
+
+  const perks = [
+    { icon: Clock, text: lang === 'en' ? 'Pick your preferred date & time' : 'Elija su fecha y hora preferida' },
+    { icon: CheckCircle, text: lang === 'en' ? 'Instant confirmation sent to your email' : 'Confirmación instantánea a su correo' },
+    { icon: Calendar, text: lang === 'en' ? 'Easy to reschedule if plans change' : 'Fácil de reprogramar si cambian sus planes' },
+  ]
 
   const calendlyUrl =
     process.env.NEXT_PUBLIC_CALENDLY_URL || 'https://calendly.com/jctireshop'
@@ -51,15 +55,11 @@ export default function CalendlyWidget() {
             <div className="inline-flex items-center justify-center w-14 h-14 bg-brand-red/10 border border-brand-red/20 rounded-2xl mb-5">
               <Calendar size={26} className="text-brand-red" />
             </div>
-            <span className="section-tag">Book Online</span>
+            <span className="section-tag">{t.tag}</span>
             <h2 className="text-3xl md:text-4xl font-black text-white mt-2 leading-tight">
-              Schedule Your
-              <br />
-              Appointment
+              {t.title}
             </h2>
-            <p className="text-gray-400 mt-4 leading-relaxed">
-              Pick a time that works for you. We'll have everything ready when you arrive.
-            </p>
+            <p className="text-gray-400 mt-4 leading-relaxed">{t.sub}</p>
 
             <ul className="mt-8 space-y-4">
               {perks.map(({ icon: Icon, text }) => (

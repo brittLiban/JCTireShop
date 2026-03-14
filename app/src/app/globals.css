@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .hero-slash {
+    background: linear-gradient(105deg, transparent 40%, rgba(220,38,38,0.06) 40%);
+  }
+  .writing-mode-vertical {
+    writing-mode: vertical-lr;
+  }
+  .hero-ring-lg {
+    width: 600px; height: 600px; right: -228px;
+  }
+  .hero-ring-md {
+    width: 420px; height: 420px; right: -160px;
+  }
+  .hero-ring-sm {
+    width: 260px; height: 260px; right: -99px;
+  }
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

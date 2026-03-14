@@ -2,51 +2,62 @@
 
 import { motion } from 'framer-motion'
 import { ArrowRight, Shield, Clock, Star, Wrench } from 'lucide-react'
-
-const badges = [
-  { icon: Shield, text: 'Licensed & Insured' },
-  { icon: Clock, text: 'Same-Day Service' },
-  { icon: Star, text: '5-Star Rated' },
-  { icon: Wrench, text: 'Expert Technicians' },
-]
+import { useLanguage } from '@/contexts/LanguageContext'
+import { translations } from '@/lib/translations'
 
 const containerVariants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.12 } },
 }
-
 const itemVariants = {
   hidden: { opacity: 0, y: 30 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
 }
 
+const badgeIcons = [Shield, Clock, Star, Wrench]
+
 export default function Hero() {
-  const scrollTo = (id: string) => {
+  const { lang } = useLanguage()
+  const t = translations[lang].hero
+
+  const scrollTo = (id: string) =>
     document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' })
-  }
+
+  const badgeKeys = ['licensed', 'sameDay', 'rated', 'expert'] as const
 
   return (
-    <section className="relative min-h-screen flex items-center bg-brand-dark overflow-hidden">
+    <section className="relative min-h-screen flex items-center bg-brand-dark overflow-hidden pt-[4.5rem]">
 
-      {/* Dot-grid background */}
+      {/* Fine dot grid */}
       <div
-        className="absolute inset-0 opacity-[0.04]"
+        className="absolute inset-0 opacity-[0.035]"
         style={{
           backgroundImage: `radial-gradient(circle at 1.5px 1.5px, white 1.5px, transparent 0)`,
           backgroundSize: '36px 36px',
         }}
       />
 
-      {/* Gradient blobs */}
-      <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-brand-red/8 via-transparent to-transparent pointer-events-none" />
-      <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-brand-red/6 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-brand-red/4 rounded-full blur-3xl pointer-events-none" />
+      {/* Diagonal red slash — the signature element */}
+      <div className="hero-slash absolute right-0 top-0 h-full w-[45%] origin-top-right pointer-events-none hidden lg:block" />
 
-      {/* Large faint tire ring decoration */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] border border-white/5 rounded-full pointer-events-none hidden lg:block" />
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/3 w-[400px] h-[400px] border border-white/5 rounded-full pointer-events-none hidden lg:block" />
+      {/* Concentric tire rings — right side */}
+      <div className="hero-ring-lg absolute rounded-full border border-white/[0.04] pointer-events-none hidden lg:block top-1/2 -translate-y-1/2" />
+      <div className="hero-ring-md absolute rounded-full border border-white/[0.04] pointer-events-none hidden lg:block top-1/2 -translate-y-1/2 opacity-80" />
+      <div className="hero-ring-sm absolute rounded-full border border-white/[0.04] pointer-events-none hidden lg:block top-1/2 -translate-y-1/2 opacity-60" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 w-full">
+      {/* Glow blobs */}
+      <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-brand-red/5 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Vertical text label — left edge, desktop only */}
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 hidden xl:flex flex-col items-center gap-3 pointer-events-none">
+        <div className="w-px h-16 bg-gradient-to-b from-transparent to-gray-700" />
+        <span className="writing-mode-vertical text-gray-700 text-[10px] tracking-[0.2em] uppercase font-medium">
+          JC Tire Shop
+        </span>
+        <div className="w-px h-16 bg-gradient-to-t from-transparent to-gray-700" />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -57,18 +68,19 @@ export default function Hero() {
           <motion.div variants={itemVariants}>
             <span className="inline-flex items-center gap-2 bg-brand-red/10 border border-brand-red/25 text-brand-red px-4 py-1.5 rounded-full text-sm font-semibold">
               <span className="w-1.5 h-1.5 bg-brand-red rounded-full animate-pulse" />
-              Your Local Tire Experts
+              {t.tag}
             </span>
           </motion.div>
 
           {/* Headline */}
           <motion.h1
             variants={itemVariants}
-            className="mt-6 text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-[1.02] tracking-tight"
+            className="mt-6 text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-black text-white leading-[1.02] tracking-tight"
           >
-            Tires You Can{' '}
-            <span className="text-brand-red relative">
-              Trust.
+            {t.headline1}{' '}
+            <span className="relative inline-block text-brand-red">
+              {t.headline2}
+              {/* Underline squiggle */}
               <svg
                 className="absolute -bottom-2 left-0 w-full"
                 viewBox="0 0 200 8"
@@ -78,9 +90,9 @@ export default function Hero() {
                 <path
                   d="M0 6 Q50 2 100 5 Q150 8 200 4"
                   stroke="#DC2626"
-                  strokeWidth="3"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
-                  opacity="0.5"
+                  opacity="0.6"
                 />
               </svg>
             </span>
@@ -89,48 +101,43 @@ export default function Hero() {
           {/* Subtitle */}
           <motion.p
             variants={itemVariants}
-            className="mt-8 text-xl text-gray-400 leading-relaxed max-w-xl"
+            className="mt-8 text-lg sm:text-xl text-gray-400 leading-relaxed max-w-xl"
           >
-            Expert tire services, fair prices, and fast turnaround. We keep
-            your vehicle safe and your wallet happy — every single time.
+            {t.sub}
           </motion.p>
 
           {/* CTAs */}
-          <motion.div
-            variants={itemVariants}
-            className="mt-10 flex flex-col sm:flex-row gap-4"
-          >
+          <motion.div variants={itemVariants} className="mt-10 flex flex-col sm:flex-row gap-4">
             <button
+              type="button"
               onClick={() => scrollTo('#schedule')}
-              className="btn-primary text-base px-8 py-4 text-lg"
+              className="btn-primary text-base px-8 py-4"
             >
-              Book Appointment
+              {t.cta1}
               <ArrowRight size={18} />
             </button>
             <button
+              type="button"
               onClick={() => scrollTo('#contact')}
-              className="btn-outline text-base px-8 py-4 text-lg"
+              className="btn-outline text-base px-8 py-4"
             >
-              Get a Free Quote
+              {t.cta2}
             </button>
           </motion.div>
 
           {/* Trust badges */}
-          <motion.div
-            variants={itemVariants}
-            className="mt-14 flex flex-wrap gap-x-8 gap-y-4"
-          >
-            {badges.map(({ icon: Icon, text }) => (
-              <div
-                key={text}
-                className="flex items-center gap-2.5 text-gray-400 text-sm"
-              >
-                <div className="w-7 h-7 bg-brand-red/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Icon size={14} className="text-brand-red" />
+          <motion.div variants={itemVariants} className="mt-12 flex flex-wrap gap-x-7 gap-y-4">
+            {badgeKeys.map((key, i) => {
+              const Icon = badgeIcons[i]
+              return (
+                <div key={key} className="flex items-center gap-2.5 text-gray-400 text-sm">
+                  <div className="w-7 h-7 bg-brand-red/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon size={13} className="text-brand-red" />
+                  </div>
+                  {t.badges[key]}
                 </div>
-                {text}
-              </div>
-            ))}
+              )
+            })}
           </motion.div>
         </motion.div>
 
@@ -138,37 +145,30 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.0, duration: 0.6 }}
-          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-2xl overflow-hidden"
+          transition={{ delay: 0.9, duration: 0.6 }}
+          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-px bg-white/8 rounded-2xl overflow-hidden border border-white/8"
         >
-          {[
-            { value: '10+', label: 'Years in Business' },
-            { value: '5,000+', label: 'Tires Installed' },
-            { value: '4.9★', label: 'Google Rating' },
-            { value: '1hr', label: 'Avg. Service Time' },
-          ].map(({ value, label }) => (
+          {(['years', 'tires', 'rating', 'time'] as const).map((key) => (
             <div
-              key={label}
-              className="bg-brand-gray/80 backdrop-blur-sm px-6 py-5 text-center"
+              key={key}
+              className="bg-[#111]/80 backdrop-blur-sm px-6 py-5 text-center hover:bg-brand-red/10 transition-colors duration-300"
             >
-              <div className="text-2xl font-black text-white">{value}</div>
-              <div className="text-xs text-gray-500 mt-1">{label}</div>
+              <div className="text-2xl sm:text-3xl font-black text-white">{t.stats[key].value}</div>
+              <div className="text-xs text-gray-500 mt-1 leading-tight">{t.stats[key].label}</div>
             </div>
           ))}
         </motion.div>
       </div>
 
-      {/* Scroll indicator */}
+      {/* Scroll cue */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.4 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
+        className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
         aria-hidden
       >
-        <span className="text-gray-600 text-xs tracking-widest uppercase font-medium">
-          Scroll
-        </span>
+        <span className="text-gray-600 text-[10px] tracking-[0.2em] uppercase font-medium">Scroll</span>
         <div className="w-px h-10 bg-gradient-to-b from-gray-600 to-transparent" />
       </motion.div>
     </section>

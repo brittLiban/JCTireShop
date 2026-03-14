@@ -7,6 +7,8 @@ import { motion, useInView } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { Send, MapPin, Phone, Clock, Mail } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { translations } from '@/lib/translations'
 
 const schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -17,37 +19,19 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-const contactInfo = [
-  {
-    icon: MapPin,
-    label: 'Address',
-    value: '123 Main Street, Your City, ST 00000',
-    href: null,
-  },
-  {
-    icon: Phone,
-    label: 'Phone',
-    value: '(555) 123-4567',
-    href: 'tel:+15551234567',
-  },
-  {
-    icon: Mail,
-    label: 'Email',
-    value: 'info@jctireshop.com',
-    href: 'mailto:info@jctireshop.com',
-  },
-  {
-    icon: Clock,
-    label: 'Hours',
-    value: 'Mon – Sat: 8:00 AM – 6:00 PM',
-    href: null,
-  },
-]
-
 export default function ContactForm() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
   const [loading, setLoading] = useState(false)
+  const { lang } = useLanguage()
+  const t = translations[lang].contact
+
+  const contactInfo = [
+    { icon: MapPin, label: t.labels.address, value: t.address, href: null },
+    { icon: Phone, label: t.labels.phone, value: t.phone, href: 'tel:+15551234567' },
+    { icon: Mail, label: 'Email', value: 'info@jctireshop.com', href: 'mailto:info@jctireshop.com' },
+    { icon: Clock, label: t.labels.hours, value: t.hours, href: null },
+  ]
 
   const {
     register,
@@ -65,10 +49,10 @@ export default function ContactForm() {
         body: JSON.stringify(data),
       })
       if (!res.ok) throw new Error('Server error')
-      toast.success("Message sent! We'll get back to you shortly.")
+      toast.success(t.labels.successMsg)
       reset()
     } catch {
-      toast.error('Something went wrong. Please call us directly.')
+      toast.error(t.labels.errorMsg)
     } finally {
       setLoading(false)
     }
@@ -85,11 +69,9 @@ export default function ContactForm() {
           transition={{ duration: 0.6 }}
           className="max-w-2xl mb-16"
         >
-          <span className="section-tag">Get In Touch</span>
-          <h2 className="section-title mt-2">Contact Us</h2>
-          <p className="section-subtitle">
-            Have a question or need a quote? We respond to every message, usually the same day.
-          </p>
+          <span className="section-tag">{t.tag}</span>
+          <h2 className="section-title mt-2">{t.title}</h2>
+          <p className="section-subtitle">{t.sub}</p>
         </motion.div>
 
         <div className="grid lg:grid-cols-5 gap-8">
@@ -102,7 +84,7 @@ export default function ContactForm() {
             className="lg:col-span-2"
           >
             <div className="bg-brand-dark rounded-2xl p-8 h-full">
-              <h3 className="font-bold text-xl text-white mb-7">Find Us</h3>
+              <h3 className="font-bold text-xl text-white mb-7">{t.findUs}</h3>
               <div className="space-y-6">
                 {contactInfo.map(({ icon: Icon, label, value, href }) => (
                   <div key={label} className="flex items-start gap-4">
@@ -151,16 +133,16 @@ export default function ContactForm() {
             onSubmit={handleSubmit(onSubmit)}
             className="lg:col-span-3 bg-white rounded-2xl p-8 shadow-sm border border-gray-100"
           >
-            <h3 className="font-bold text-xl text-brand-dark mb-6">Send a Message</h3>
+            <h3 className="font-bold text-xl text-brand-dark mb-6">{t.labels.send}</h3>
 
             <div className="space-y-5">
               <div className="grid sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="admin-label">Full Name *</label>
+                  <label className="admin-label">{t.labels.name} *</label>
                   <input
                     {...register('name')}
                     className="admin-input"
-                    placeholder="John Smith"
+                    placeholder={t.labels.namePlaceholder}
                     autoComplete="name"
                   />
                   {errors.name && (
@@ -168,12 +150,12 @@ export default function ContactForm() {
                   )}
                 </div>
                 <div>
-                  <label className="admin-label">Email Address *</label>
+                  <label className="admin-label">{t.labels.email} *</label>
                   <input
                     {...register('email')}
                     type="email"
                     className="admin-input"
-                    placeholder="john@example.com"
+                    placeholder={t.labels.emailPlaceholder}
                     autoComplete="email"
                   />
                   {errors.email && (
@@ -183,26 +165,23 @@ export default function ContactForm() {
               </div>
 
               <div>
-                <label className="admin-label">
-                  Phone Number{' '}
-                  <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
+                <label className="admin-label">{t.labels.phoneField}</label>
                 <input
                   {...register('phone')}
                   type="tel"
                   className="admin-input"
-                  placeholder="(555) 123-4567"
+                  placeholder={t.labels.phonePlaceholder}
                   autoComplete="tel"
                 />
               </div>
 
               <div>
-                <label className="admin-label">Message *</label>
+                <label className="admin-label">{t.labels.message} *</label>
                 <textarea
                   {...register('message')}
                   rows={5}
                   className="admin-input resize-none"
-                  placeholder="Tell us about your tire needs — tire size, vehicle make/model, or any questions..."
+                  placeholder={t.labels.messagePlaceholder}
                 />
                 {errors.message && (
                   <p className="text-red-500 text-xs mt-1.5">{errors.message.message}</p>
@@ -217,11 +196,11 @@ export default function ContactForm() {
                 {loading ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Sending...
+                    {t.labels.sending}
                   </>
                 ) : (
                   <>
-                    Send Message
+                    {t.labels.send}
                     <Send size={16} />
                   </>
                 )}

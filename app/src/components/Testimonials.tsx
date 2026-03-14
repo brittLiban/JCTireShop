@@ -5,6 +5,8 @@ import { useRef } from 'react'
 import { Star, Quote } from 'lucide-react'
 import Image from 'next/image'
 import type { GoogleReview } from '@/lib/google-reviews'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { translations } from '@/lib/translations'
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -77,6 +79,8 @@ function ReviewCard({ review, index }: { review: GoogleReview; index: number }) 
 export default function Testimonials({ reviews }: { reviews: GoogleReview[] }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
+  const { lang } = useLanguage()
+  const t = translations[lang].testimonials
 
   const avgRating = reviews.length
     ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
@@ -94,13 +98,9 @@ export default function Testimonials({ reviews }: { reviews: GoogleReview[] }) {
           className="flex flex-col md:flex-row md:items-end md:justify-between mb-16 gap-6"
         >
           <div>
-            <span className="section-tag">Customer Reviews</span>
-            <h2 className="section-title mt-2">
-              What Our Customers Say
-            </h2>
-            <p className="section-subtitle max-w-xl">
-              Real reviews from real people. We let our work speak for itself.
-            </p>
+            <span className="section-tag">{t.tag}</span>
+            <h2 className="section-title mt-2">{t.title}</h2>
+            <p className="section-subtitle max-w-xl">{t.sub}</p>
           </div>
 
           {/* Google rating badge */}
@@ -122,7 +122,7 @@ export default function Testimonials({ reviews }: { reviews: GoogleReview[] }) {
                   ))}
                 </div>
               </div>
-              <p className="text-gray-500 text-xs mt-0.5">Google Reviews</p>
+              <p className="text-gray-500 text-xs mt-0.5">{t.powered}</p>
             </div>
           </div>
         </motion.div>
