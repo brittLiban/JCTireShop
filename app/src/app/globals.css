@@ -4,7 +4,7 @@
 
 @layer utilities {
   .hero-slash {
-    background: linear-gradient(105deg, transparent 40%, rgba(220,38,38,0.06) 40%);
+    background: linear-gradient(105deg, transparent 40%, rgba(255,214,0,0.05) 40%);
   }
   .writing-mode-vertical {
     writing-mode: vertical-lr;
@@ -40,11 +40,11 @@
   /* ── Buttons ─────────────────────────────────────────────────────── */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3
-           bg-brand-red text-white font-semibold rounded-xl
-           hover:bg-red-700 active:scale-95
+           bg-brand-yellow text-black font-bold rounded-xl
+           hover:bg-yellow-400 active:scale-95
            transition-all duration-200
-           shadow-lg shadow-red-900/25
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-red focus-visible:ring-offset-2;
+           shadow-lg shadow-yellow-900/20
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-yellow focus-visible:ring-offset-2;
   }
 
   .btn-outline {
@@ -72,7 +72,7 @@
   }
 
   .section-tag {
-    @apply text-brand-red font-semibold text-sm tracking-widest uppercase;
+    @apply text-brand-yellow font-semibold text-sm tracking-widest uppercase;
   }
 
   /* ── Cards ───────────────────────────────────────────────────────── */
@@ -86,7 +86,7 @@
   .admin-input {
     @apply w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
            bg-white text-brand-dark placeholder-gray-400
-           focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent
+           focus:outline-none focus:ring-2 focus:ring-brand-yellow focus:border-transparent
            transition-colors;
   }
 
@@ -97,7 +97,7 @@
   .admin-select {
     @apply w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
            bg-white text-brand-dark
-           focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent
+           focus:outline-none focus:ring-2 focus:ring-brand-yellow focus:border-transparent
            transition-colors cursor-pointer;
   }
 }

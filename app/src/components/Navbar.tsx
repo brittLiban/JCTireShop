@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Menu, X, Phone } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { translations } from '@/lib/translations'
@@ -34,10 +35,13 @@ export default function Navbar() {
   return (
     <>
       {/* Announcement bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-brand-red h-9 flex items-center justify-center">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-brand-red h-9 flex items-center justify-center gap-4">
         <p className="text-white text-xs font-semibold tracking-wide text-center px-4">
           {t.announcement}
         </p>
+        <span className="hidden sm:inline-flex items-center gap-1.5 bg-brand-yellow text-black text-xs font-black px-2.5 py-1 rounded-full tracking-wide uppercase">
+          ★ Se Habla Español
+        </span>
       </div>
 
       {/* Main nav */}
@@ -45,24 +49,22 @@ export default function Navbar() {
         className={`fixed top-9 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
             ? 'bg-brand-dark/97 backdrop-blur-md shadow-2xl shadow-black/30'
-            : 'bg-brand-dark/80 backdrop-blur-sm'
+            : 'bg-brand-dark/90 backdrop-blur-sm'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-18">
+          <div className="flex items-center justify-between h-16">
 
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
-              <div className="relative">
-                <div className="w-9 h-9 bg-brand-red rounded-full flex items-center justify-center shadow-lg shadow-red-900/40 group-hover:scale-105 transition-transform">
-                  <span className="text-white font-black text-sm tracking-tight">JC</span>
-                </div>
-                <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-white rounded-full border-2 border-brand-dark" />
-              </div>
-              <div className="leading-none">
-                <span className="text-white font-black text-base tracking-tight block">JC Tire Shop</span>
-                <span className="text-gray-500 text-[10px] tracking-widest uppercase font-medium">Est. 2010</span>
-              </div>
+            <Link href="/" className="flex items-center flex-shrink-0 group">
+              <Image
+                src="/logo.png"
+                alt="JC Central Tire Shop"
+                width={160}
+                height={64}
+                className="h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-200"
+                priority
+              />
             </Link>
 
             {/* Desktop nav */}
@@ -75,25 +77,25 @@ export default function Navbar() {
                   className="text-gray-300 hover:text-white font-medium transition-colors text-sm tracking-wide relative group"
                 >
                   {link.label}
-                  <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-brand-red group-hover:w-full transition-all duration-300" />
+                  <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-brand-yellow group-hover:w-full transition-all duration-300" />
                 </a>
               ))}
 
               {/* Language toggle */}
               <button
                 onClick={toggle}
-                className="flex items-center gap-1.5 border border-white/20 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-300 hover:border-white/50 hover:text-white transition-all"
+                className="flex items-center gap-1.5 border border-white/20 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-300 hover:border-brand-yellow/60 hover:text-brand-yellow transition-all"
                 type="button"
                 aria-label="Switch language"
               >
-                <span className={lang === 'en' ? 'text-white' : 'text-gray-500'}>EN</span>
+                <span className={lang === 'en' ? 'text-brand-yellow' : 'text-gray-500'}>EN</span>
                 <span className="text-gray-600">|</span>
-                <span className={lang === 'es' ? 'text-white' : 'text-gray-500'}>ES</span>
+                <span className={lang === 'es' ? 'text-brand-yellow' : 'text-gray-500'}>ES</span>
               </button>
 
               <a
                 href="tel:+15551234567"
-                className="flex items-center gap-2 bg-brand-red text-white px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-red-700 transition-all shadow-lg shadow-red-900/25 active:scale-95"
+                className="flex items-center gap-2 bg-brand-yellow text-black px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-yellow-400 transition-all shadow-lg shadow-yellow-900/20 active:scale-95"
               >
                 <Phone size={13} />
                 {t.callNow}
@@ -105,7 +107,7 @@ export default function Navbar() {
               <button
                 onClick={toggle}
                 type="button"
-                className="border border-white/20 rounded-lg px-2.5 py-1.5 text-xs font-bold text-gray-300 hover:text-white transition-all"
+                className="border border-white/20 rounded-lg px-2.5 py-1.5 text-xs font-bold text-gray-300 hover:text-brand-yellow transition-all"
               >
                 {lang === 'en' ? 'ES' : 'EN'}
               </button>
@@ -146,6 +148,9 @@ export default function Navbar() {
               <Phone size={16} />
               {t.callNow}
             </a>
+            <div className="mt-2 text-center text-brand-yellow text-xs font-bold tracking-widest uppercase">
+              ★ Se Habla Español
+            </div>
           </div>
         </div>
       </nav>

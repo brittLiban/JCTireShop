@@ -12,11 +12,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'JC Tire Shop | Professional Tire Services',
-    template: '%s | JC Tire Shop',
+    default: 'JC Central Tire Shop | Professional Tire Services',
+    template: '%s | JC Central Tire Shop',
   },
   description:
-    'JC Tire Shop — your trusted local tire experts. Fast installation, competitive prices, expert service, and same-day appointments available.',
+    'JC Central Tire Shop — your trusted local tire experts. Fast installation, competitive prices, expert service, and same-day appointments available. Se Habla Español.',
   keywords: [
     'tire shop',
     'tires',
@@ -26,17 +26,22 @@ export const metadata: Metadata = {
     'tire rotation',
     'flat repair',
     'local tire shop',
+    'se habla español',
   ],
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
   openGraph: {
-    title: 'JC Tire Shop',
-    description: 'Your trusted local tire experts. Fast, fair, and professional.',
+    title: 'JC Central Tire Shop',
+    description: 'Your trusted local tire experts. Fast, fair, and professional. Se Habla Español.',
     type: 'website',
     url: 'https://jctireshop.com',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'JC Tire Shop',
-    description: 'Your trusted local tire experts.',
+    title: 'JC Central Tire Shop',
+    description: 'Your trusted local tire experts. Se Habla Español.',
   },
 }
 

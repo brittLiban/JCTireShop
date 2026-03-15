@@ -1,7 +1,7 @@
 export const translations = {
   en: {
     nav: {
-      announcement: 'Same-day service available — Call us now',
+      announcement: 'Same-day service available — Call us now | Se Habla Español',
       services: 'Services',
       reviews: 'Reviews',
       book: 'Book Appointment',
@@ -118,14 +118,14 @@ export const translations = {
         sunday: 'Sunday',
         sundayTime: 'Closed',
       },
-      copyright: 'JC Tire Shop. All rights reserved.',
+      copyright: 'JC Central Tire Shop. All rights reserved.',
       staffLogin: 'Staff Login',
     },
   },
 
   es: {
     nav: {
-      announcement: 'Servicio el mismo día disponible — Llámenos ahora',
+      announcement: 'Servicio el mismo día disponible — Llámenos ahora | Se Habla Español',
       services: 'Servicios',
       reviews: 'Reseñas',
       book: 'Reservar Cita',
@@ -242,7 +242,7 @@ export const translations = {
         sunday: 'Domingo',
         sundayTime: 'Cerrado',
       },
-      copyright: 'JC Tire Shop. Todos los derechos reservados.',
+      copyright: 'JC Central Tire Shop. Todos los derechos reservados.',
       staffLogin: 'Acceso Personal',
     },
   },
