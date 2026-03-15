@@ -40,7 +40,7 @@ const schema = z.object({
 })
 
 type FormData = z.infer<typeof schema>
-type StockFilter = 'all' | 'in-stock' | 'low' | 'out'
+type StockFilter = 'all' | 'in-stock' | 'low' | 'out' | 'single' | 'pair' | 'set'
 
 // Parse "225/65R17" or "225 65 17" or "22565r17" into {width,aspect,diameter}
 function parseSizeQuery(q: string): { width?: number; aspect?: number; diameter?: number } {
@@ -57,6 +57,15 @@ function stockStatus(qty: number) {
   return               { label: 'In Stock',      color: 'bg-green-100 text-green-700',   icon: CheckCircle2,  dot: 'bg-green-500' }
 }
 
+function unitBadge(qty: number): { label: string; color: string } | null {
+  if (qty === 0) return null
+  if (qty === 1) return { label: 'Single',  color: 'bg-blue-100 text-blue-700' }
+  if (qty === 2) return { label: 'Pair',    color: 'bg-purple-100 text-purple-700' }
+  if (qty === 3) return { label: '3 — Pair+', color: 'bg-purple-100 text-purple-700' }
+  if (qty % 4 === 0) return { label: `${qty / 4 === 1 ? 'Set of 4' : `${qty / 4}x Sets`}`, color: 'bg-emerald-100 text-emerald-700' }
+  return { label: `${qty} units`, color: 'bg-gray-100 text-gray-600' }
+}
+
 export default function InventoryPage() {
   const [tires,     setTires]     = useState<Tire[]>([])
   const [loading,   setLoading]   = useState(true)
@@ -67,9 +76,11 @@ export default function InventoryPage() {
   const [filter,    setFilter]    = useState<StockFilter>('all')
   const [adjusting, setAdjusting] = useState<string | null>(null)
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+
+  const watchedQty = watch('quantity')
 
   const fetchTires = useCallback(async () => {
     setLoading(true)
@@ -86,11 +97,14 @@ export default function InventoryPage() {
 
   useEffect(() => { fetchTires() }, [fetchTires])
 
-  // Smart filter: try size parse first, then text match
+  // Smart filter
   const filtered = tires.filter((t) => {
     if (filter === 'in-stock' && t.quantity <= 4) return false
     if (filter === 'low'      && !(t.quantity > 0 && t.quantity <= 4)) return false
     if (filter === 'out'      && t.quantity !== 0) return false
+    if (filter === 'single'   && t.quantity !== 1) return false
+    if (filter === 'pair'     && t.quantity < 2) return false
+    if (filter === 'set'      && t.quantity < 4) return false
 
     if (search === '') return true
 
@@ -183,7 +197,7 @@ export default function InventoryPage() {
   }
 
   // Analytics
-  const fmt       = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  const fmt        = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   const totalUnits = tires.reduce((s, t) => s + t.quantity, 0)
   const costVal    = tires.reduce((s, t) => s + parseFloat(t.cost)  * t.quantity, 0)
   const retailVal  = tires.reduce((s, t) => s + parseFloat(t.price) * t.quantity, 0)
@@ -191,6 +205,9 @@ export default function InventoryPage() {
   const marginPct  = retailVal > 0 ? (margin / retailVal) * 100 : 0
   const lowCount   = tires.filter((t) => t.quantity > 0 && t.quantity <= 4).length
   const outCount   = tires.filter((t) => t.quantity === 0).length
+  const singleCount = tires.filter((t) => t.quantity === 1).length
+  const pairCount   = tires.filter((t) => t.quantity >= 2).length
+  const setCount    = tires.filter((t) => t.quantity >= 4).length
 
   return (
     <div className="space-y-6">
@@ -220,7 +237,7 @@ export default function InventoryPage() {
             placeholder='Brand, model, location — or tire size like "225/65R17" or "225 65 17"'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-brand-gray border border-white/10 rounded-xl pl-12 pr-10 py-3.5 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red"
+            className="w-full bg-brand-gray border border-white/10 rounded-xl pl-12 pr-10 py-3.5 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-brand-yellow"
           />
           {search && (
             <button
@@ -242,12 +259,44 @@ export default function InventoryPage() {
             ) : (
               <span className="text-gray-400">
                 <span className="text-white font-bold">{filtered.length}</span> tire{filtered.length !== 1 ? 's' : ''} match &quot;{search}&quot;
-                {filtered.some((t) => t.quantity > 4) && <span className="text-green-400 font-semibold ml-2">· In stock ✓</span>}
-                {filtered.length > 0 && filtered.every((t) => t.quantity === 0) && <span className="text-red-400 font-semibold ml-2">· All out of stock</span>}
+                {filtered.some((t) => t.quantity >= 4) && <span className="text-emerald-400 font-semibold ml-2">· Full set available ✓</span>}
+                {filtered.some((t) => t.quantity >= 2) && !filtered.some((t) => t.quantity >= 4) && <span className="text-purple-400 font-semibold ml-2">· Pair available ✓</span>}
+                {filtered.every((t) => t.quantity === 0) && <span className="text-red-400 font-semibold ml-2">· All out of stock</span>}
               </span>
             )}
           </p>
         )}
+
+        {/* Quick unit filter inside search bar */}
+        <div className="flex items-center gap-2 mt-4 flex-wrap">
+          <span className="text-gray-600 text-xs font-semibold">Show me tires with:</span>
+          {([
+            { key: 'single', label: '1 — Single',   color: 'border-blue-400 text-blue-400',    active: 'bg-blue-500 text-white border-blue-500' },
+            { key: 'pair',   label: '2+ — Pair',     color: 'border-purple-400 text-purple-400', active: 'bg-purple-500 text-white border-purple-500' },
+            { key: 'set',    label: '4+ — Full Set', color: 'border-emerald-400 text-emerald-400', active: 'bg-emerald-500 text-white border-emerald-500' },
+          ] as { key: StockFilter; label: string; color: string; active: string }[]).map(({ key, label, color, active }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setFilter(filter === key ? 'all' : key)}
+              className={clsx(
+                'px-3 py-1 rounded-full text-xs font-bold border transition-all',
+                filter === key ? active : `bg-transparent ${color} hover:opacity-80`
+              )}
+            >
+              {label}
+            </button>
+          ))}
+          {(filter === 'single' || filter === 'pair' || filter === 'set') && (
+            <button
+              type="button"
+              onClick={() => setFilter('all')}
+              className="text-gray-500 hover:text-white text-xs flex items-center gap-1"
+            >
+              <X size={12} /> Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Analytics strip */}
@@ -266,6 +315,46 @@ export default function InventoryPage() {
             <p className="text-gray-400 text-xs mt-0.5">{label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Unit availability summary */}
+      <div className="grid grid-cols-3 gap-3">
+        <button
+          type="button"
+          onClick={() => setFilter(filter === 'single' ? 'all' : 'single')}
+          className={clsx(
+            'rounded-xl border p-3 text-left transition-all',
+            filter === 'single' ? 'bg-blue-50 border-blue-300' : 'bg-white border-gray-100 hover:border-blue-200'
+          )}
+        >
+          <p className="text-xl font-black text-blue-600">{singleCount}</p>
+          <p className="text-xs font-semibold text-gray-500 mt-0.5">Singles</p>
+          <p className="text-[10px] text-gray-400">exactly 1 unit</p>
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilter(filter === 'pair' ? 'all' : 'pair')}
+          className={clsx(
+            'rounded-xl border p-3 text-left transition-all',
+            filter === 'pair' ? 'bg-purple-50 border-purple-300' : 'bg-white border-gray-100 hover:border-purple-200'
+          )}
+        >
+          <p className="text-xl font-black text-purple-600">{pairCount}</p>
+          <p className="text-xs font-semibold text-gray-500 mt-0.5">Have Pairs</p>
+          <p className="text-[10px] text-gray-400">2+ units available</p>
+        </button>
+        <button
+          type="button"
+          onClick={() => setFilter(filter === 'set' ? 'all' : 'set')}
+          className={clsx(
+            'rounded-xl border p-3 text-left transition-all',
+            filter === 'set' ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-gray-100 hover:border-emerald-200'
+          )}
+        >
+          <p className="text-xl font-black text-emerald-600">{setCount}</p>
+          <p className="text-xs font-semibold text-gray-500 mt-0.5">Full Sets</p>
+          <p className="text-[10px] text-gray-400">4+ units available</p>
+        </button>
       </div>
 
       {/* Filter tabs */}
@@ -301,7 +390,7 @@ export default function InventoryPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                {['Brand / Model', 'Size', 'Status', 'Qty', 'Location', 'Cost', 'Price', 'Margin', ''].map((h) => (
+                {['Brand / Model', 'Size', 'Status', 'Units', 'Location', 'Cost', 'Price', 'Margin', ''].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     {h}
                   </th>
@@ -328,6 +417,7 @@ export default function InventoryPage() {
                 filtered.map((t) => {
                   const status     = stockStatus(t.quantity)
                   const StatusIcon = status.icon
+                  const badge      = unitBadge(t.quantity)
                   const tireMargin = parseFloat(t.price) - parseFloat(t.cost)
                   const tirePct    = parseFloat(t.price) > 0 ? (tireMargin / parseFloat(t.price)) * 100 : 0
                   const marginColor = tirePct >= 20 ? 'text-emerald-600' : tirePct >= 10 ? 'text-yellow-600' : 'text-red-500'
@@ -354,7 +444,7 @@ export default function InventoryPage() {
                         </span>
                       </td>
 
-                      {/* Quick qty +/- */}
+                      {/* Units — qty + quick adjust + unit badge */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
                           <button
@@ -379,6 +469,11 @@ export default function InventoryPage() {
                             <Plus size={11} />
                           </button>
                         </div>
+                        {badge && (
+                          <span className={clsx('mt-1 inline-block px-1.5 py-0.5 rounded text-[10px] font-bold', badge.color)}>
+                            {badge.label}
+                          </span>
+                        )}
                       </td>
 
                       {/* Location */}
@@ -489,17 +584,52 @@ export default function InventoryPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="admin-label">Quantity *</label>
-                  <input {...register('quantity')} type="number" className="admin-input" placeholder="0" />
-                  {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity.message}</p>}
+              {/* Quantity — quick pick + manual */}
+              <div>
+                <label className="admin-label">How Many? *</label>
+
+                {/* Quick-pick buttons */}
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {[
+                    { qty: 1, label: 'Single',    sub: '1 tire',    color: 'border-blue-300 hover:border-blue-500',    activeColor: 'bg-blue-500 border-blue-500 text-white' },
+                    { qty: 2, label: 'Pair',       sub: '2 tires',   color: 'border-purple-300 hover:border-purple-500', activeColor: 'bg-purple-500 border-purple-500 text-white' },
+                    { qty: 4, label: 'Full Set',   sub: '4 tires',   color: 'border-emerald-300 hover:border-emerald-500', activeColor: 'bg-emerald-500 border-emerald-500 text-white' },
+                  ].map(({ qty, label, sub, color, activeColor }) => {
+                    const isActive = Number(watchedQty) === qty
+                    return (
+                      <button
+                        key={qty}
+                        type="button"
+                        onClick={() => setValue('quantity', qty, { shouldValidate: true })}
+                        className={clsx(
+                          'flex flex-col items-center py-3 rounded-xl border-2 transition-all text-center',
+                          isActive ? activeColor : `bg-white border-gray-200 ${color} text-gray-700`
+                        )}
+                      >
+                        <span className="text-xl font-black leading-none">{qty}</span>
+                        <span className="text-xs font-bold mt-0.5">{label}</span>
+                        <span className={clsx('text-[10px]', isActive ? 'opacity-80' : 'text-gray-400')}>{sub}</span>
+                      </button>
+                    )
+                  })}
                 </div>
-                <div>
-                  <label className="admin-label">Location</label>
-                  <input {...register('location')} className="admin-input" placeholder="Bay 1 · Shelf A" />
-                  <p className="text-gray-400 text-[10px] mt-1">Where it&apos;s stored</p>
+
+                {/* Manual quantity input */}
+                <div className="flex items-center gap-2">
+                  <input
+                    {...register('quantity')}
+                    type="number"
+                    className="admin-input"
+                    placeholder="Or type a custom amount"
+                  />
                 </div>
+                {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity.message}</p>}
+              </div>
+
+              <div>
+                <label className="admin-label">Location</label>
+                <input {...register('location')} className="admin-input" placeholder="Bay 1 · Shelf A" />
+                <p className="text-gray-400 text-[10px] mt-1">Where it&apos;s stored</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -531,7 +661,7 @@ export default function InventoryPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 bg-brand-red text-white rounded-xl py-2.5 text-sm font-bold hover:bg-red-700 transition-colors disabled:opacity-60"
+                  className="flex-1 bg-brand-dark text-white rounded-xl py-2.5 text-sm font-bold hover:bg-black transition-colors disabled:opacity-60"
                 >
                   {saving ? 'Saving...' : editing ? 'Update Tire' : 'Add Tire'}
                 </button>
