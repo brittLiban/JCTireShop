@@ -26,20 +26,20 @@ function ServiceCard({ title, description, icon: Icon, num, index }: {
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.08, ease: 'easeOut' }}
       className="group relative bg-white border border-gray-100 rounded-2xl p-7
-                 hover:border-brand-red/20 hover:shadow-2xl hover:shadow-red-50
+                 hover:border-brand-yellow/30 hover:shadow-2xl hover:shadow-yellow-50
                  transition-all duration-300 cursor-default overflow-hidden"
     >
-      {/* Top accent line */}
-      <div className="absolute top-0 left-6 right-6 h-0.5 bg-brand-red rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+      {/* Top accent line — yellow */}
+      <div className="absolute top-0 left-6 right-6 h-0.5 bg-brand-yellow rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
 
       {/* Large faint number watermark */}
-      <span className="absolute -top-3 -right-1 text-8xl font-black text-gray-100 select-none group-hover:text-brand-red/10 transition-colors duration-300 leading-none">
+      <span className="absolute -top-3 -right-1 text-8xl font-black text-gray-100 select-none group-hover:text-brand-yellow/15 transition-colors duration-300 leading-none">
         {num}
       </span>
 
       <div className="relative">
-        <div className="w-12 h-12 bg-brand-red/8 rounded-xl flex items-center justify-center mb-5 group-hover:bg-brand-red transition-colors duration-300">
-          <Icon size={21} className="text-brand-red group-hover:text-white transition-colors duration-300" />
+        <div className="w-12 h-12 bg-brand-yellow/10 rounded-xl flex items-center justify-center mb-5 group-hover:bg-brand-yellow transition-colors duration-300">
+          <Icon size={21} className="text-brand-yellow group-hover:text-black transition-colors duration-300" />
         </div>
         <h3 className="font-black text-base text-brand-dark mb-2 leading-snug tracking-tight">
           {title}
@@ -60,7 +60,7 @@ export default function Services() {
     <section id="services" className="py-28 bg-brand-light">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Header — left-aligned, editorial */}
+        {/* Header */}
         <motion.div
           ref={ref}
           initial={{ opacity: 0, y: 24 }}
@@ -96,7 +96,6 @@ export default function Services() {
           transition={{ duration: 0.6, delay: 0.5 }}
           className="mt-12 bg-brand-dark rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden"
         >
-          {/* Decorative slash */}
           <div className="absolute inset-0 pointer-events-none hero-slash opacity-50" />
           <div className="relative">
             <p className="text-white font-black text-xl tracking-tight">{t.ctaTitle}</p>

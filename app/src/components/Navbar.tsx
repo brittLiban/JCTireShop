@@ -35,11 +35,11 @@ export default function Navbar() {
   return (
     <>
       {/* Announcement bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-brand-red h-9 flex items-center justify-center gap-4">
-        <p className="text-white text-xs font-semibold tracking-wide text-center px-4">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-brand-yellow h-9 flex items-center justify-center gap-4">
+        <p className="text-black text-xs font-bold tracking-wide text-center px-4">
           {t.announcement}
         </p>
-        <span className="hidden sm:inline-flex items-center gap-1.5 bg-brand-yellow text-black text-xs font-black px-2.5 py-1 rounded-full tracking-wide uppercase">
+        <span className="hidden sm:inline-flex items-center gap-1.5 bg-black text-brand-yellow text-xs font-black px-2.5 py-1 rounded-full tracking-wide uppercase">
           ★ Se Habla Español
         </span>
       </div>

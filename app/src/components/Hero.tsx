@@ -37,7 +37,7 @@ export default function Hero() {
         }}
       />
 
-      {/* Diagonal red slash — the signature element */}
+      {/* Diagonal yellow slash — the signature element */}
       <div className="hero-slash absolute right-0 top-0 h-full w-[45%] origin-top-right pointer-events-none hidden lg:block" />
 
       {/* Concentric tire rings — right side */}
@@ -46,13 +46,13 @@ export default function Hero() {
       <div className="hero-ring-sm absolute rounded-full border border-white/[0.04] pointer-events-none hidden lg:block top-1/2 -translate-y-1/2 opacity-60" />
 
       {/* Glow blobs */}
-      <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-brand-red/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-brand-yellow/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* Vertical text label — left edge, desktop only */}
       <div className="absolute left-4 top-1/2 -translate-y-1/2 hidden xl:flex flex-col items-center gap-3 pointer-events-none">
         <div className="w-px h-16 bg-gradient-to-b from-transparent to-gray-700" />
         <span className="writing-mode-vertical text-gray-700 text-[10px] tracking-[0.2em] uppercase font-medium">
-          JC Tire Shop
+          JC Central Tire Shop
         </span>
         <div className="w-px h-16 bg-gradient-to-t from-transparent to-gray-700" />
       </div>
@@ -66,8 +66,8 @@ export default function Hero() {
         >
           {/* Tag */}
           <motion.div variants={itemVariants}>
-            <span className="inline-flex items-center gap-2 bg-brand-red/10 border border-brand-red/25 text-brand-red px-4 py-1.5 rounded-full text-sm font-semibold">
-              <span className="w-1.5 h-1.5 bg-brand-red rounded-full animate-pulse" />
+            <span className="inline-flex items-center gap-2 bg-brand-yellow/10 border border-brand-yellow/30 text-brand-yellow px-4 py-1.5 rounded-full text-sm font-semibold">
+              <span className="w-1.5 h-1.5 bg-brand-yellow rounded-full animate-pulse" />
               {t.tag}
             </span>
           </motion.div>
@@ -78,7 +78,7 @@ export default function Hero() {
             className="mt-6 text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-black text-white leading-[1.02] tracking-tight"
           >
             {t.headline1}{' '}
-            <span className="relative inline-block text-brand-red">
+            <span className="relative inline-block text-brand-yellow">
               {t.headline2}
               {/* Underline squiggle */}
               <svg
@@ -89,7 +89,7 @@ export default function Hero() {
               >
                 <path
                   d="M0 6 Q50 2 100 5 Q150 8 200 4"
-                  stroke="#DC2626"
+                  stroke="#FFD600"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   opacity="0.6"
@@ -131,8 +131,8 @@ export default function Hero() {
               const Icon = badgeIcons[i]
               return (
                 <div key={key} className="flex items-center gap-2.5 text-gray-400 text-sm">
-                  <div className="w-7 h-7 bg-brand-red/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Icon size={13} className="text-brand-red" />
+                  <div className="w-7 h-7 bg-brand-yellow/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Icon size={13} className="text-brand-yellow" />
                   </div>
                   {t.badges[key]}
                 </div>
@@ -151,7 +151,7 @@ export default function Hero() {
           {(['years', 'tires', 'rating', 'time'] as const).map((key) => (
             <div
               key={key}
-              className="bg-[#111]/80 backdrop-blur-sm px-6 py-5 text-center hover:bg-brand-red/10 transition-colors duration-300"
+              className="bg-[#111]/80 backdrop-blur-sm px-6 py-5 text-center hover:bg-brand-yellow/10 transition-colors duration-300"
             >
               <div className="text-2xl sm:text-3xl font-black text-white">{t.stats[key].value}</div>
               <div className="text-xs text-gray-500 mt-1 leading-tight">{t.stats[key].label}</div>

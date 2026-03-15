@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { Phone, Mail, MapPin, Clock } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { translations } from '@/lib/translations'
@@ -23,11 +24,10 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-9 h-9 bg-brand-red rounded-full flex items-center justify-center">
-                <span className="text-white font-black text-sm">JC</span>
+            <div className="mb-4">
+              <div className="bg-white rounded-xl px-3 py-2 inline-block">
+                <Image src="/logo.png" alt="JC Central Tire Shop" width={120} height={44} className="h-9 w-auto object-contain" />
               </div>
-              <span className="text-white font-bold text-base">JC Tire Shop</span>
             </div>
             <p className="text-sm leading-relaxed">{t.tagline}</p>
           </div>
@@ -44,7 +44,7 @@ export default function Footer() {
                     href={href}
                     className="hover:text-white transition-colors inline-flex items-center gap-1.5 group"
                   >
-                    <span className="w-1 h-1 bg-brand-red rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <span className="w-1 h-1 bg-brand-yellow rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                     {label}
                   </a>
                 </li>
@@ -59,20 +59,20 @@ export default function Footer() {
             </h4>
             <ul className="space-y-4 text-sm">
               <li className="flex items-center gap-3">
-                <Phone size={14} className="text-brand-red flex-shrink-0" />
+                <Phone size={14} className="text-brand-yellow flex-shrink-0" />
                 <a href="tel:+15551234567" className="hover:text-white transition-colors">
                   (555) 123-4567
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <Mail size={14} className="text-brand-red flex-shrink-0" />
+                <Mail size={14} className="text-brand-yellow flex-shrink-0" />
                 <a href="mailto:info@jctireshop.com" className="hover:text-white transition-colors">
                   info@jctireshop.com
                 </a>
               </li>
               <li className="flex items-start gap-3">
-                <MapPin size={14} className="text-brand-red flex-shrink-0 mt-0.5" />
-                <span>123 Main Street<br />Your City, ST 00000</span>
+                <MapPin size={14} className="text-brand-yellow flex-shrink-0 mt-0.5" />
+                <span>Kent, Washington</span>
               </li>
             </ul>
           </div>
@@ -84,14 +84,14 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-3">
-                <Clock size={14} className="text-brand-red flex-shrink-0 mt-0.5" />
+                <Clock size={14} className="text-brand-yellow flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-white font-medium">{t.hours.weekdays}</p>
                   <p>{t.hours.weekdayTime}</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
-                <Clock size={14} className="text-brand-red flex-shrink-0 mt-0.5" />
+                <Clock size={14} className="text-brand-yellow flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-white font-medium">{t.hours.saturday}</p>
                   <p>{t.hours.saturdayTime}</p>
