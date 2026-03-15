@@ -13,6 +13,7 @@ const schema = z.object({
   quantity: z.coerce.number().int().min(0),
   cost: z.coerce.number().positive(),
   price: z.coerce.number().positive(),
+  location: z.string().max(100).optional(),
   notes: z.string().max(500).optional(),
 })
 
