@@ -1,7 +1,7 @@
 export const translations = {
   en: {
     nav: {
-      announcement: 'Same-day service available — Call us now | Se Habla Español',
+      announcement: 'Serving Kent, WA — Same-day service available | Se Habla Español',
       services: 'Services',
       reviews: 'Reviews',
       book: 'Book Appointment',
@@ -9,7 +9,7 @@ export const translations = {
       callNow: 'Call Now',
     },
     hero: {
-      tag: 'Your Local Tire Experts',
+      tag: 'Kent, Washington\'s Tire Experts',
       headline1: 'Tires You Can',
       headline2: 'Trust.',
       sub: 'Expert tire services, fair prices, and fast turnaround. We keep your vehicle safe and your wallet happy — every single time.',
@@ -78,7 +78,7 @@ export const translations = {
       title: 'Contact Us',
       sub: 'Have a question or need a quote? Send us a message and we\'ll respond promptly.',
       findUs: 'Find Us',
-      address: '123 Main Street, Your City, ST 00000',
+      address: 'Kent, Washington',
       phone: '(555) 123-4567',
       hours: 'Mon–Sat: 8am – 6pm',
       labels: {
@@ -125,7 +125,7 @@ export const translations = {
 
   es: {
     nav: {
-      announcement: 'Servicio el mismo día disponible — Llámenos ahora | Se Habla Español',
+      announcement: 'Sirviendo Kent, WA — Servicio el mismo día disponible | Se Habla Español',
       services: 'Servicios',
       reviews: 'Reseñas',
       book: 'Reservar Cita',
@@ -133,7 +133,7 @@ export const translations = {
       callNow: 'Llamar Ahora',
     },
     hero: {
-      tag: 'Sus Expertos Locales en Llantas',
+      tag: 'Sus Expertos en Llantas en Kent, WA',
       headline1: 'Llantas en las que',
       headline2: 'Confiar.',
       sub: 'Servicios expertos de llantas, precios justos y entrega rápida. Mantenemos su vehículo seguro y su bolsillo contento — siempre.',
@@ -202,7 +202,7 @@ export const translations = {
       title: 'Contáctenos',
       sub: '¿Tiene alguna pregunta o necesita una cotización? Envíenos un mensaje y responderemos pronto.',
       findUs: 'Encuéntrenos',
-      address: '123 Main Street, Su Ciudad, ST 00000',
+      address: 'Kent, Washington',
       phone: '(555) 123-4567',
       hours: 'Lun–Sáb: 8am – 6pm',
       labels: {
