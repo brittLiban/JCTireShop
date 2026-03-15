@@ -46,11 +46,7 @@ export default function Navbar() {
 
       {/* Main nav */}
       <nav
-        className={`fixed top-9 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'bg-brand-dark/97 backdrop-blur-md shadow-2xl shadow-black/30'
-            : 'bg-brand-dark/90 backdrop-blur-sm'
-        }`}
+        className="fixed top-9 left-0 right-0 z-50 bg-brand-dark shadow-2xl shadow-black/30"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
