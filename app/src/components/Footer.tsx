@@ -25,9 +25,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="mb-4">
-              <div className="bg-white rounded-xl px-3 py-2 inline-block">
-                <Image src="/logo.png" alt="JC Central Tire Shop" width={120} height={44} className="h-9 w-auto object-contain" />
-              </div>
+              <Image src="/logo.png" alt="JC Central Tire Shop" width={140} height={52} className="h-11 w-auto object-contain" />
             </div>
             <p className="text-sm leading-relaxed">{t.tagline}</p>
           </div>
