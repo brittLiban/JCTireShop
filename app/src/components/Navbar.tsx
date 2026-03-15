@@ -57,14 +57,16 @@ export default function Navbar() {
 
             {/* Logo */}
             <Link href="/" className="flex items-center flex-shrink-0 group">
-              <Image
-                src="/logo.png"
-                alt="JC Central Tire Shop"
-                width={160}
-                height={64}
-                className="h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-200"
-                priority
-              />
+              <div className="bg-white rounded-xl px-3 py-1.5 shadow-md group-hover:scale-105 transition-transform duration-200">
+                <Image
+                  src="/logo.png"
+                  alt="JC Central Tire Shop"
+                  width={140}
+                  height={52}
+                  className="h-10 w-auto object-contain"
+                  priority
+                />
+              </div>
             </Link>
 
             {/* Desktop nav */}
@@ -116,7 +118,7 @@ export default function Navbar() {
                 className="text-white p-2 hover:bg-white/10 rounded-lg transition-colors"
                 onClick={() => setOpen(!open)}
                 aria-label="Toggle navigation menu"
-                aria-expanded={open ? 'true' : 'false'}
+                aria-expanded={open}
               >
                 {open ? <X size={22} /> : <Menu size={22} />}
               </button>
