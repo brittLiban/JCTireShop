@@ -15,8 +15,8 @@ export default async function HomePage() {
       <Navbar />
       <main>
         <Hero />
-        <Services />
         <Gallery />
+        <Services />
         <Testimonials reviews={reviews} />
         <ContactForm />
       </main>
