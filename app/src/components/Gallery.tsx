@@ -9,8 +9,12 @@ import { Camera } from 'lucide-react'
 // Then add the filenames to this array below.
 // Example: '/gallery/my-shop.jpg'
 const photos: { src: string; alt: string }[] = [
-  // { src: '/gallery/shop-front.jpg', alt: 'Shop front' },
-  // { src: '/gallery/tire-install.jpg', alt: 'Tire installation' },
+  { src: '/gallery/p1.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p2.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p3.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p4.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p5.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p6.jpeg', alt: 'JC Central Tire Shop' },
 ]
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -86,9 +90,6 @@ export default function Gallery() {
         )}
       </div>
 
-      <p className="text-center text-gray-700 text-xs mt-8 tracking-wider">
-        ★ &nbsp; Real photos coming soon — drop files in <code className="text-gray-600">public/gallery/</code>
-      </p>
     </section>
   )
 }
