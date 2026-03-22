@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import Services from '@/components/Services'
+import Gallery from '@/components/Gallery'
 import Testimonials from '@/components/Testimonials'
 import ContactForm from '@/components/ContactForm'
 import Footer from '@/components/Footer'
@@ -15,6 +16,7 @@ export default async function HomePage() {
       <main>
         <Hero />
         <Services />
+        <Gallery />
         <Testimonials reviews={reviews} />
         <ContactForm />
       </main>

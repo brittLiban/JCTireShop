@@ -44,26 +44,29 @@ export default function Navbar() {
       </div>
 
       {/* Main nav */}
-      <nav
-        className="fixed top-9 left-0 right-0 z-50 bg-brand-dark shadow-2xl shadow-black/30"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <nav className="fixed top-9 left-0 right-0 z-50 bg-brand-dark shadow-2xl shadow-black/30">
+        <div className="flex items-stretch h-16">
 
-            {/* Logo */}
-            <Link href="/" className="flex items-center flex-shrink-0 group">
-              <Image
-                src="/logo.png"
-                alt="JC Central Tire Shop"
-                width={160}
-                height={60}
-                className="h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-200"
-                priority
-              />
-            </Link>
+          {/* Logo block — solid yellow background, full height */}
+          <Link
+            href="/"
+            className="flex items-center justify-center bg-brand-yellow px-5 flex-shrink-0 group hover:bg-yellow-400 transition-colors duration-200"
+          >
+            <Image
+              src="/logo.png"
+              alt="JC Central Tire Shop"
+              width={150}
+              height={56}
+              className="h-11 w-auto object-contain group-hover:scale-105 transition-transform duration-200"
+              priority
+            />
+          </Link>
+
+          {/* Right side — nav links */}
+          <div className="flex items-center flex-1 px-4 sm:px-6 lg:px-8">
 
             {/* Desktop nav */}
-            <div className="hidden md:flex items-center gap-7">
+            <div className="hidden md:flex items-center gap-7 ml-auto">
               {navLinks.map((link) => (
                 <a
                   key={link.href}
@@ -98,7 +101,7 @@ export default function Navbar() {
             </div>
 
             {/* Mobile controls */}
-            <div className="md:hidden flex items-center gap-2">
+            <div className="md:hidden flex items-center gap-2 ml-auto">
               <button
                 onClick={toggle}
                 type="button"

@@ -102,9 +102,18 @@
   }
 }
 
-/* ── Calendly overrides ────────────────────────────────────────────────────── */
-.calendly-inline-widget {
-  min-height: 680px;
+/* ── Gallery marquee ───────────────────────────────────────────────────────── */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 35s linear infinite;
+}
+
+/* ── Dark section tag ──────────────────────────────────────────────────────── */
+.section-tag-dark {
+  @apply text-brand-yellow font-semibold text-sm tracking-widest uppercase;
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────────────────────── */
