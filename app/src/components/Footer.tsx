@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Phone, Mail, MapPin, Clock } from 'lucide-react'
+import { Phone, MapPin, Clock, Instagram } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { translations } from '@/lib/translations'
 
@@ -58,14 +58,14 @@ export default function Footer() {
             <ul className="space-y-4 text-sm">
               <li className="flex items-center gap-3">
                 <Phone size={14} className="text-brand-yellow flex-shrink-0" />
-                <a href="tel:+15551234567" className="hover:text-white transition-colors">
-                  (555) 123-4567
+                <a href="tel:+12538138473" className="hover:text-white transition-colors">
+                  (253) 813-8473
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <Mail size={14} className="text-brand-yellow flex-shrink-0" />
-                <a href="mailto:info@jctireshop.com" className="hover:text-white transition-colors">
-                  info@jctireshop.com
+                <Instagram size={14} className="text-brand-yellow flex-shrink-0" />
+                <a href="https://instagram.com/jccentraltireshop" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                  @jccentraltireshop
                 </a>
               </li>
               <li className="flex items-start gap-3">

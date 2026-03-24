@@ -1,10 +1,20 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import { ArrowRight, Shield, Clock, Star, Wrench, MapPin } from 'lucide-react'
 import Image from 'next/image'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { translations } from '@/lib/translations'
+
+const bgPhotos = [
+  '/gallery/p1.jpeg',
+  '/gallery/p2.jpeg',
+  '/gallery/p3.jpeg',
+  '/gallery/p4.jpeg',
+  '/gallery/p5.jpeg',
+  '/gallery/p6.jpeg',
+]
 
 const containerVariants = {
   hidden: {},
@@ -20,6 +30,14 @@ const badgeIcons = [Shield, Clock, Star, Wrench]
 export default function Hero() {
   const { lang } = useLanguage()
   const t = translations[lang].hero
+  const [bgIndex, setBgIndex] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setBgIndex((i) => (i + 1) % bgPhotos.length)
+    }, 4000)
+    return () => clearInterval(id)
+  }, [])
 
   const scrollTo = (id: string) =>
     document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' })
@@ -29,14 +47,21 @@ export default function Hero() {
   return (
     <section className="relative min-h-screen flex items-center bg-brand-dark overflow-hidden pt-[4.5rem]">
 
-      {/* Fine dot grid */}
-      <div
-        className="absolute inset-0 opacity-[0.035]"
-        style={{
-          backgroundImage: `radial-gradient(circle at 1.5px 1.5px, white 1.5px, transparent 0)`,
-          backgroundSize: '36px 36px',
-        }}
-      />
+      {/* ── Background slideshow ───────────────────────────────────── */}
+      {bgPhotos.map((src, i) => (
+        <div
+          key={src}
+          className={`absolute inset-0 transition-opacity duration-1000 ${i === bgIndex ? 'opacity-20' : 'opacity-0'}`}
+        >
+          <Image src={src} alt="" fill className="object-cover object-center" priority={i === 0} />
+        </div>
+      ))}
+
+      {/* Dark overlay so text stays legible over slideshow */}
+      <div className="absolute inset-0 bg-brand-dark/75" />
+
+      {/* Dot grid */}
+      <div className="dot-grid absolute inset-0 opacity-[0.035]" />
 
       {/* Glow blob */}
       <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-brand-yellow/5 rounded-full blur-3xl pointer-events-none" />
@@ -103,7 +128,7 @@ export default function Hero() {
               {t.sub}
             </motion.p>
 
-            {/* Mobile storefront photo — shows between subtitle and CTAs on small screens */}
+            {/* Mobile storefront photo */}
             <motion.div
               variants={itemVariants}
               className="lg:hidden mt-8 rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative"
@@ -113,12 +138,10 @@ export default function Hero() {
                   src="/gallery/hp.jpeg"
                   alt="JC Central Tire Shop — Kent, Washington"
                   fill
-                  className="object-cover object-center"
+                  className="object-cover object-top"
                   priority
                 />
-                {/* Dark gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                {/* Location chip */}
                 <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full">
                   <MapPin size={11} className="text-brand-yellow" />
                   Kent, Washington
@@ -126,7 +149,7 @@ export default function Hero() {
               </div>
             </motion.div>
 
-            {/* CTAs */}
+            {/* Single CTA */}
             <motion.div variants={itemVariants} className="mt-8 lg:mt-10 flex flex-col sm:flex-row gap-4">
               <button
                 type="button"
@@ -135,13 +158,6 @@ export default function Hero() {
               >
                 {t.cta1}
                 <ArrowRight size={18} />
-              </button>
-              <button
-                type="button"
-                onClick={() => scrollTo('#contact')}
-                className="btn-outline text-base px-8 py-4"
-              >
-                {t.cta2}
               </button>
             </motion.div>
 
@@ -168,8 +184,7 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.3, ease: 'easeOut' }}
             className="hidden lg:flex flex-shrink-0 w-[420px] xl:w-[480px] flex-col gap-3"
           >
-            {/* Main photo card */}
-            <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-[0_32px_80px_rgba(0,0,0,0.6)]">
+            <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
               <div className="relative w-full h-[480px] xl:h-[540px]">
                 <Image
                   src="/gallery/hp.jpeg"
@@ -178,10 +193,7 @@ export default function Hero() {
                   className="object-cover object-center"
                   priority
                 />
-                {/* Bottom gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-                {/* Bottom info bar */}
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <div className="flex items-end justify-between">
                     <div>
@@ -191,7 +203,6 @@ export default function Hero() {
                         <p className="text-gray-300 text-sm">Kent, Washington</p>
                       </div>
                     </div>
-                    {/* Open badge */}
                     <div className="bg-brand-yellow text-black text-xs font-black px-3 py-1.5 rounded-full uppercase tracking-wide">
                       Open Today
                     </div>
@@ -200,7 +211,7 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* Phone quick-action card */}
+            {/* Phone quick-action */}
             <a
               href="tel:+12538138473"
               className="flex items-center justify-between bg-brand-yellow rounded-2xl px-6 py-4 group hover:bg-yellow-400 transition-colors"
@@ -217,14 +228,14 @@ export default function Hero() {
 
         </div>
 
-        {/* Stats bar */}
+        {/* Stats bar — 3 stats, no rating */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.6 }}
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-px bg-white/8 rounded-2xl overflow-hidden border border-white/8"
+          className="mt-16 grid grid-cols-3 gap-px bg-white/8 rounded-2xl overflow-hidden border border-white/8"
         >
-          {(['years', 'tires', 'rating', 'time'] as const).map((key) => (
+          {(['years', 'tires', 'time'] as const).map((key) => (
             <div
               key={key}
               className="bg-[#111]/80 backdrop-blur-sm px-6 py-5 text-center hover:bg-brand-yellow/10 transition-colors duration-300"

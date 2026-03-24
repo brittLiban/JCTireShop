@@ -69,18 +69,15 @@ export default function Gallery() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
         <div className="flex items-end justify-between">
           <div>
-            <span className="section-tag-dark">Our Shop</span>
-            <h2 className="text-3xl font-black text-white mt-2 tracking-tight">See Us In Action</h2>
+            <span className="section-tag-dark">Our Work</span>
+            <h2 className="text-3xl font-black text-white mt-2 tracking-tight">Check Out Our Wheels</h2>
           </div>
           <p className="text-gray-500 text-sm hidden sm:block">Kent, Washington</p>
         </div>
       </div>
 
       {/* Marquee track */}
-      <div
-        className="flex gap-4 w-max animate-marquee hover:[animation-play-state:paused]"
-        style={{ paddingLeft: '1rem' }}
-      >
+      <div className="flex gap-4 w-max animate-marquee hover:[animation-play-state:paused] pl-4">
         {doubled.map((item, i) =>
           'src' in item && item.src ? (
             <GalleryTile key={i} src={item.src} alt={item.alt} />

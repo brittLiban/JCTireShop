@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer utilities {
+  .dot-grid {
+    background-image: radial-gradient(circle at 1.5px 1.5px, white 1.5px, transparent 0);
+    background-size: 36px 36px;
+  }
   .hero-slash {
     background: linear-gradient(105deg, transparent 40%, rgba(255,214,0,0.05) 40%);
   }

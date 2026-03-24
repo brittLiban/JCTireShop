@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion, useInView } from 'framer-motion'
 import { useRef, useState } from 'react'
-import { Send, MapPin, Phone, Clock, Mail } from 'lucide-react'
+import { Send, MapPin, Phone, Clock, Instagram } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { translations } from '@/lib/translations'
@@ -27,10 +27,10 @@ export default function ContactForm() {
   const t = translations[lang].contact
 
   const contactInfo = [
-    { icon: MapPin, label: t.labels.address, value: t.address, href: null },
-    { icon: Phone, label: t.labels.phone, value: t.phone, href: 'tel:+15551234567' },
-    { icon: Mail, label: 'Email', value: 'info@jctireshop.com', href: 'mailto:info@jctireshop.com' },
-    { icon: Clock, label: t.labels.hours, value: t.hours, href: null },
+    { icon: MapPin,     label: t.labels.address,   value: t.address,           href: null },
+    { icon: Phone,      label: t.labels.phone,     value: t.phone,             href: 'tel:+12538138473' },
+    { icon: Instagram,  label: t.labels.instagram, value: '@jccentraltireshop', href: 'https://instagram.com/jccentraltireshop' },
+    { icon: Clock,      label: t.labels.hours,     value: t.hours,             href: null },
   ]
 
   const {
