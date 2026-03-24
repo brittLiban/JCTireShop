@@ -2,7 +2,7 @@
 
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
-import { Quote } from 'lucide-react'
+import { Star, Quote } from 'lucide-react'
 import Image from 'next/image'
 import type { GoogleReview } from '@/lib/google-reviews'
 import { useLanguage } from '@/contexts/LanguageContext'
