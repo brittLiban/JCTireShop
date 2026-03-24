@@ -58,9 +58,10 @@ export default function Footer() {
             <ul className="space-y-4 text-sm">
               <li className="flex items-center gap-3">
                 <Phone size={14} className="text-brand-yellow flex-shrink-0" />
-                <a href="tel:+12538138473" className="hover:text-white transition-colors">
-                  (253) 813-8473
-                </a>
+                <div className="flex flex-col gap-0.5">
+                  <a href="tel:+12538138473" className="hover:text-white transition-colors">(253) 813-8473</a>
+                  <a href="tel:+12063054349" className="hover:text-white transition-colors">(206) 305-4349</a>
+                </div>
               </li>
               <li className="flex items-center gap-3">
                 <Instagram size={14} className="text-brand-yellow flex-shrink-0" />
@@ -70,7 +71,7 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-3">
                 <MapPin size={14} className="text-brand-yellow flex-shrink-0 mt-0.5" />
-                <span>Kent, Washington</span>
+                <span>208 Central Ave S<br />Kent, WA 98032</span>
               </li>
             </ul>
           </div>
@@ -95,13 +96,15 @@ export default function Footer() {
                   <p>{t.hours.saturdayTime}</p>
                 </div>
               </li>
-              <li className="flex items-start gap-3">
-                <Clock size={14} className="text-gray-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-gray-600 font-medium">{t.hours.sunday}</p>
-                  <p className="text-gray-600">{t.hours.sundayTime}</p>
-                </div>
-              </li>
+              {t.hours.sunday && (
+                <li className="flex items-start gap-3">
+                  <Clock size={14} className="text-gray-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-gray-600 font-medium">{t.hours.sunday}</p>
+                    <p className="text-gray-600">{t.hours.sundayTime}</p>
+                  </div>
+                </li>
+              )}
             </ul>
           </div>
 

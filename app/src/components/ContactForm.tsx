@@ -27,10 +27,11 @@ export default function ContactForm() {
   const t = translations[lang].contact
 
   const contactInfo = [
-    { icon: MapPin,     label: t.labels.address,   value: t.address,           href: null },
-    { icon: Phone,      label: t.labels.phone,     value: t.phone,             href: 'tel:+12538138473' },
-    { icon: Instagram,  label: t.labels.instagram, value: '@jccentraltireshop', href: 'https://instagram.com/jccentraltireshop' },
-    { icon: Clock,      label: t.labels.hours,     value: t.hours,             href: null },
+    { icon: MapPin,    label: t.labels.address,   value: t.address,            href: 'https://maps.google.com/?q=208+Central+Ave+S+Kent+WA+98032' },
+    { icon: Phone,     label: t.labels.phone,     value: t.phone,              href: 'tel:+12538138473' },
+    { icon: Phone,     label: '',                 value: t.phone2,             href: 'tel:+12063054349' },
+    { icon: Instagram, label: t.labels.instagram, value: '@jccentraltireshop', href: 'https://instagram.com/jccentraltireshop' },
+    { icon: Clock,     label: t.labels.hours,     value: t.hours,              href: null },
   ]
 
   const {
@@ -113,7 +114,7 @@ export default function ContactForm() {
               {/* Map placeholder */}
               <div className="mt-8 rounded-xl overflow-hidden bg-brand-gray border border-white/10 h-40 flex items-center justify-center">
                 <a
-                  href="https://maps.google.com/?q=123+Main+Street"
+                  href="https://maps.google.com/?q=208+Central+Ave+S+Kent+WA+98032"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-sm"

@@ -33,32 +33,32 @@ export const translations = {
       sub: 'From installation to emergency repairs — we handle every aspect of your tire needs with speed, expertise, and care.',
       items: [
         {
-          title: 'Tire Installation',
-          description: 'Professional mounting and balancing for all tire types. New or used — we get it done right the first time, fast.',
-        },
-        {
-          title: 'Tire Rotation',
-          description: 'Extend the life of your tires and maintain even tread wear with regular rotation on the correct schedule.',
-        },
-        {
-          title: 'Plug Repair',
-          description: 'Quick and reliable plug repairs for punctures. In and out fast — most plug jobs done in under 15 minutes.',
-        },
-        {
-          title: 'Patch Repair',
-          description: 'Internal patch repairs for deeper punctures that need a permanent fix. Safe, proper, and built to last.',
-        },
-        {
           title: 'New Tires w/ Warranty',
-          description: 'Wide selection of brand-name new tires with warranty included. We help you find the right fit for your vehicle and budget.',
+          description: 'Wide selection of brand-name new tires with warranty. We help you find the right fit for your vehicle and budget.',
         },
         {
           title: 'Used Tires w/ Warranty',
           description: 'Quality used tires at unbeatable prices — all inspected and sold with warranty so you drive away with confidence.',
         },
+        {
+          title: 'Mount & Balance',
+          description: 'Professional mounting and balancing for all tire types and vehicle sizes. Precision work, fast turnaround.',
+        },
+        {
+          title: 'Tire Repair — Patch & Plug',
+          description: 'Fast plug and patch repairs to get you back on the road. Most repairs done in under 15 minutes.',
+        },
+        {
+          title: 'New Rims & All Terrain',
+          description: 'Upgrade your ride with new rims or all-terrain tires built for any road condition — we carry a great selection.',
+        },
+        {
+          title: 'Rotation & Air Check',
+          description: 'Regular rotation extends tire life and keeps wear even. We also top off air and do free inspections with every visit.',
+        },
       ],
-      ctaTitle: 'Not sure what you need?',
-      ctaSub: "Call us or drop by — we'll take a look and tell you exactly what's going on, for free.",
+      ctaTitle: 'No appointment needed — just show up!',
+      ctaSub: 'Walk-ins always welcome. Call us or drop by at 208 Central Ave S, Kent WA.',
       ctaBtn: 'Call (253) 813-8473',
     },
     testimonials: {
@@ -72,9 +72,10 @@ export const translations = {
       title: 'Contact Us',
       sub: 'Have a question or need a quote? Send us a message and we\'ll respond promptly.',
       findUs: 'Find Us',
-      address: 'Kent, Washington',
+      address: '208 Central Ave S, Kent WA 98032',
       phone: '(253) 813-8473',
-      hours: 'Mon–Sat: 8am – 6pm',
+      phone2: '(206) 305-4349',
+      hours: 'Mon–Sat: 8:30AM–6:30PM · Sun: 9AM–5PM',
       labels: {
         address: 'Address',
         phone: 'Phone',
@@ -106,12 +107,12 @@ export const translations = {
         contact: 'Contact Us',
       },
       hours: {
-        weekdays: 'Mon – Friday',
-        weekdayTime: '8:00 AM – 6:00 PM',
-        saturday: 'Saturday',
-        saturdayTime: '8:00 AM – 4:00 PM',
-        sunday: 'Sunday',
-        sundayTime: 'Closed',
+        weekdays: 'Mon – Saturday',
+        weekdayTime: '8:30 AM – 6:30 PM',
+        saturday: 'Sunday',
+        saturdayTime: '9:00 AM – 5:00 PM',
+        sunday: '',
+        sundayTime: '',
       },
       copyright: 'JC Central Tire Shop. All rights reserved.',
       staffLogin: 'Staff Login',
@@ -152,22 +153,6 @@ export const translations = {
       sub: 'Desde instalación hasta reparaciones de emergencia — manejamos cada aspecto con velocidad, experiencia y cuidado.',
       items: [
         {
-          title: 'Instalación de Llantas',
-          description: 'Montaje y balanceo profesional para todos los tipos de llantas. Nuevas o usadas — lo hacemos bien a la primera.',
-        },
-        {
-          title: 'Rotación de Llantas',
-          description: 'Extienda la vida de sus llantas y mantenga un desgaste uniforme con rotación regular en el horario correcto.',
-        },
-        {
-          title: 'Reparación con Tapón',
-          description: 'Reparaciones rápidas con tapón para ponchaduras. La mayoría se completan en menos de 15 minutos.',
-        },
-        {
-          title: 'Reparación con Parche',
-          description: 'Parches internos para ponchaduras más profundas que necesitan una solución permanente. Seguro y duradero.',
-        },
-        {
           title: 'Llantas Nuevas con Garantía',
           description: 'Amplia selección de llantas nuevas de marca con garantía incluida. Le ayudamos a encontrar la opción correcta.',
         },
@@ -175,9 +160,25 @@ export const translations = {
           title: 'Llantas Usadas con Garantía',
           description: 'Llantas usadas de calidad a precios inmejorables — todas inspeccionadas y vendidas con garantía.',
         },
+        {
+          title: 'Montaje y Balanceo',
+          description: 'Montaje y balanceo profesional para todos los tipos de llantas. Trabajo de precisión, entrega rápida.',
+        },
+        {
+          title: 'Reparación — Parche y Tapón',
+          description: 'Reparaciones rápidas con parche o tapón para regresar a la carretera. La mayoría en menos de 15 minutos.',
+        },
+        {
+          title: 'Rines Nuevos y Todo Terreno',
+          description: 'Mejore su vehículo con rines nuevos o llantas todo terreno. Tenemos una excelente selección.',
+        },
+        {
+          title: 'Rotación e Inspección de Aire',
+          description: 'La rotación regular extiende la vida de sus llantas. También revisamos el aire e inspeccionamos gratis.',
+        },
       ],
-      ctaTitle: '¿No sabe qué necesita?',
-      ctaSub: 'Llámenos o visítenos — le revisamos el vehículo y le decimos exactamente qué necesita, gratis.',
+      ctaTitle: '¡Sin cita previa — solo llegue!',
+      ctaSub: 'Siempre bienvenido sin cita. Llámenos o visítenos en 208 Central Ave S, Kent WA.',
       ctaBtn: 'Llamar (253) 813-8473',
     },
     testimonials: {
@@ -191,9 +192,10 @@ export const translations = {
       title: 'Contáctenos',
       sub: '¿Tiene alguna pregunta o necesita una cotización? Envíenos un mensaje y responderemos pronto.',
       findUs: 'Encuéntrenos',
-      address: 'Kent, Washington',
+      address: '208 Central Ave S, Kent WA 98032',
       phone: '(253) 813-8473',
-      hours: 'Lun–Sáb: 8am – 6pm',
+      phone2: '(206) 305-4349',
+      hours: 'Lun–Sáb: 8:30AM–6:30PM · Dom: 9AM–5PM',
       labels: {
         address: 'Dirección',
         phone: 'Teléfono',
@@ -225,12 +227,12 @@ export const translations = {
         contact: 'Contáctenos',
       },
       hours: {
-        weekdays: 'Lun – Viernes',
-        weekdayTime: '8:00 AM – 6:00 PM',
-        saturday: 'Sábado',
-        saturdayTime: '8:00 AM – 4:00 PM',
-        sunday: 'Domingo',
-        sundayTime: 'Cerrado',
+        weekdays: 'Lun – Sábado',
+        weekdayTime: '8:30 AM – 6:30 PM',
+        saturday: 'Domingo',
+        saturdayTime: '9:00 AM – 5:00 PM',
+        sunday: '',
+        sundayTime: '',
       },
       copyright: 'JC Central Tire Shop. Todos los derechos reservados.',
       staffLogin: 'Acceso Personal',
