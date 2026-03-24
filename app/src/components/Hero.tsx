@@ -7,13 +7,12 @@ import Image from 'next/image'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { translations } from '@/lib/translations'
 
+// ── Drop hero background photos in /public/bg/ ──────────────────
+// These are SEPARATE from the rolling gallery (public/gallery/)
 const bgPhotos = [
-  '/gallery/p1.jpeg',
-  '/gallery/p2.jpeg',
-  '/gallery/p3.jpeg',
-  '/gallery/p4.jpeg',
-  '/gallery/p5.jpeg',
-  '/gallery/p6.jpeg',
+  '/bg/bg1.jpeg',
+  // '/bg/bg2.jpeg',
+  // '/bg/bg3.jpeg',
 ]
 
 const containerVariants = {
@@ -51,14 +50,14 @@ export default function Hero() {
       {bgPhotos.map((src, i) => (
         <div
           key={src}
-          className={`absolute inset-0 transition-opacity duration-1000 ${i === bgIndex ? 'opacity-20' : 'opacity-0'}`}
+          className={`absolute inset-0 transition-opacity duration-1000 ${i === bgIndex ? 'opacity-40' : 'opacity-0'}`}
         >
           <Image src={src} alt="" fill className="object-cover object-center" priority={i === 0} />
         </div>
       ))}
 
-      {/* Dark overlay so text stays legible over slideshow */}
-      <div className="absolute inset-0 bg-brand-dark/75" />
+      {/* Dark overlay — keep text legible */}
+      <div className="absolute inset-0 bg-brand-dark/60" />
 
       {/* Dot grid */}
       <div className="dot-grid absolute inset-0 opacity-[0.035]" />
