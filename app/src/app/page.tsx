@@ -5,6 +5,7 @@ import Gallery from '@/components/Gallery'
 import Testimonials from '@/components/Testimonials'
 import ContactForm from '@/components/ContactForm'
 import Footer from '@/components/Footer'
+import StructuredData from '@/components/StructuredData'
 import { getGoogleReviews } from '@/lib/google-reviews'
 
 export default async function HomePage() {
@@ -12,6 +13,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <StructuredData />
       <Navbar />
       <main>
         <Hero />
