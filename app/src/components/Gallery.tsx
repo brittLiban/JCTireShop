@@ -51,7 +51,7 @@ function GalleryTile({ src, alt }: { src: string; alt: string }) {
         src={src}
         alt={alt}
         fill
-        className="object-cover hover:scale-105 transition-transform duration-700"
+        className="object-cover object-bottom hover:scale-105 transition-transform duration-700"
         onError={() => setError(true)}
       />
     </div>
