@@ -45,7 +45,7 @@ export default function Navbar() {
 
       {/* Main nav */}
       <nav className="fixed top-9 left-0 right-0 z-50 bg-brand-dark shadow-2xl shadow-black/40">
-        <div className="flex items-stretch h-20">
+        <div className="flex items-stretch h-24">
 
           {/* Logo block — yellow slab that bleeds into a diagonal cut */}
           <Link
@@ -57,9 +57,9 @@ export default function Navbar() {
             <Image
               src="/logo.png"
               alt="JC Central Tire Shop"
-              width={190}
-              height={72}
-              className="relative z-10 h-[4.25rem] w-auto object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-200 pr-4"
+              width={260}
+              height={100}
+              className="relative z-10 h-[5.5rem] w-auto object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-200 pr-6"
               priority
             />
           </Link>

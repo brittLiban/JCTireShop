@@ -23,7 +23,7 @@
     width: 260px; height: 260px; right: -99px;
   }
   .logo-block {
-    min-width: 220px;
+    min-width: 260px;
   }
   .logo-slash {
     clip-path: polygon(0 0, 92% 0, 100% 100%, 0 100%);
