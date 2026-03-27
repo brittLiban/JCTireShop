@@ -280,17 +280,6 @@ export default function Hero() {
         </motion.div>
       </div>
 
-      {/* Scroll cue */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.4 }}
-        className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
-        aria-hidden
-      >
-        <span className="text-gray-600 text-[10px] tracking-[0.2em] uppercase font-medium">Scroll</span>
-        <div className="w-px h-10 bg-gradient-to-b from-gray-600 to-transparent" />
-      </motion.div>
     </section>
   )
 }
