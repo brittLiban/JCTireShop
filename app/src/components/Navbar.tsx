@@ -50,7 +50,7 @@ export default function Navbar() {
           {/* Logo block — yellow slab that bleeds into a diagonal cut */}
           <Link
             href="/"
-            className="logo-block relative flex items-center justify-center flex-shrink-0 group"
+            className="logo-block relative flex flex-col items-center justify-center flex-shrink-0 group py-1"
           >
             {/* Yellow background with diagonal right edge */}
             <span className="logo-slash absolute inset-0 bg-brand-yellow group-hover:bg-yellow-300 transition-colors duration-200" />
@@ -59,9 +59,12 @@ export default function Navbar() {
               alt="JC Central Tire Shop"
               width={260}
               height={100}
-              className="relative z-10 h-[5.5rem] w-auto object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-200 pr-6"
+              className="relative z-10 h-[4.75rem] w-auto object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-200 pr-6"
               priority
             />
+            <span className="relative z-10 text-[10px] font-black uppercase tracking-widest text-black/70 pr-6 -mt-1">
+              Kent, WA&apos;s Tire Experts
+            </span>
           </Link>
 
           {/* Right side — nav links */}

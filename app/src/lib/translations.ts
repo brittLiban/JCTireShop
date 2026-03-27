@@ -12,7 +12,7 @@ export const translations = {
       tag: 'Kent, Washington\'s Tire Experts',
       headline1: 'Tires You Can',
       headline2: 'Trust.',
-      sub: 'Expert tire services, fair prices, and fast turnaround. We keep your vehicle safe and your wallet happy — every single time.',
+      sub: 'Expert tire services offering premium new and high-quality used tires. Professional installation and warranty included. Fast, reliable service — open 7 days a week.\n• Additional services available',
       cta1: 'Get a Free Quote',
       cta2: 'Call Us Now',
       badges: {
@@ -21,7 +21,7 @@ export const translations = {
         expert: 'Expert Technicians',
       },
       stats: {
-        years:  { value: '10+',      label: 'Years in Business' },
+        years:  { value: '15+',      label: 'Years in Business' },
         tires:  { value: '200,000+', label: 'Tires Installed' },
         time:   { value: '20-30 min',label: 'Avg. Install Time' },
       },
@@ -37,7 +37,7 @@ export const translations = {
         },
         {
           title: 'Used Tires w/ Warranty',
-          description: 'Quality used tires at unbeatable prices — all inspected and sold with warranty so you drive away with confidence.',
+          description: 'Quality used tires with 85%–90% tread life remaining — all inspected and sold with warranty so you drive away with confidence.',
         },
         {
           title: 'Mount & Balance',
@@ -131,7 +131,7 @@ export const translations = {
       tag: 'Sus Expertos en Llantas en Kent, WA',
       headline1: 'Llantas en las que',
       headline2: 'Confiar.',
-      sub: 'Servicios expertos de llantas, precios justos y entrega rápida. Mantenemos su vehículo seguro y su bolsillo contento — siempre.',
+      sub: 'Servicios expertos en llantas nuevas de alta calidad y llantas usadas seleccionadas. Instalación profesional y garantía incluida. Servicio rápido y confiable — abierto 7 días a la semana.\n• Servicios adicionales disponibles',
       cta1: 'Obtener Cotización Gratis',
       cta2: 'Llamarnos Ahora',
       badges: {
@@ -140,7 +140,7 @@ export const translations = {
         expert: 'Técnicos Expertos',
       },
       stats: {
-        years:  { value: '10+',      label: 'Años en el Negocio' },
+        years:  { value: '15+',      label: 'Años en el Negocio' },
         tires:  { value: '200,000+', label: 'Llantas Instaladas' },
         time:   { value: '20-30 min',label: 'Tiempo de Instalación' },
       },
@@ -156,7 +156,7 @@ export const translations = {
         },
         {
           title: 'Llantas Usadas con Garantía',
-          description: 'Llantas usadas de calidad a precios inmejorables — todas inspeccionadas y vendidas con garantía.',
+          description: 'Llantas usadas con 85%–90% de vida útil del hilo restante — todas inspeccionadas y vendidas con garantía.',
         },
         {
           title: 'Montaje y Balanceo',

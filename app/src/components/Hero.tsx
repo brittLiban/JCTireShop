@@ -50,14 +50,14 @@ export default function Hero() {
       {bgPhotos.map((src, i) => (
         <div
           key={src}
-          className={`absolute inset-0 transition-opacity duration-1000 ${i === bgIndex ? 'opacity-40' : 'opacity-0'}`}
+          className={`absolute inset-0 transition-opacity duration-1000 ${i === bgIndex ? 'opacity-55' : 'opacity-0'}`}
         >
           <Image src={src} alt="" fill className="object-cover object-center" priority={i === 0} />
         </div>
       ))}
 
       {/* Dark overlay — keep text legible */}
-      <div className="absolute inset-0 bg-brand-dark/60" />
+      <div className="absolute inset-0 bg-brand-dark/55" />
 
       {/* Dot grid */}
       <div className="dot-grid absolute inset-0 opacity-[0.035]" />
@@ -120,12 +120,13 @@ export default function Hero() {
             </motion.h1>
 
             {/* Subtitle */}
-            <motion.p
-              variants={itemVariants}
-              className="mt-6 text-lg sm:text-xl text-gray-400 leading-relaxed max-w-xl"
-            >
-              {t.sub}
-            </motion.p>
+            <motion.div variants={itemVariants} className="mt-6 max-w-xl">
+              {t.sub.split('\n').map((line, i) => (
+                <p key={i} className={`text-lg sm:text-xl leading-relaxed ${line.startsWith('•') ? 'text-brand-yellow font-semibold mt-2' : 'text-gray-400'}`}>
+                  {line}
+                </p>
+              ))}
+            </motion.div>
 
             {/* Mobile storefront photo */}
             <motion.div
@@ -134,7 +135,7 @@ export default function Hero() {
             >
               <div className="relative w-full h-52 sm:h-64">
                 <Image
-                  src="/gallery/hp.jpeg"
+                  src="/frontpage.png"
                   alt="JC Central Tire Shop — Kent, Washington"
                   fill
                   className="object-cover object-top"
@@ -186,7 +187,7 @@ export default function Hero() {
             <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
               <div className="relative w-full h-[480px] xl:h-[540px]">
                 <Image
-                  src="/gallery/hp.jpeg"
+                  src="/frontpage.png"
                   alt="JC Central Tire Shop — Kent, Washington"
                   fill
                   className="object-cover object-center"
