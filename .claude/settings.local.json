@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(docker compose:*)",
-      "Bash(python -:*)"
+      "Bash(python -:*)",
+      "Bash(docker info:*)",
+      "Bash(docker context:*)"
     ]
   }
 }

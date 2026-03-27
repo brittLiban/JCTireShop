@@ -44,21 +44,22 @@ export default function Navbar() {
       </div>
 
       {/* Main nav */}
-      <nav className="fixed top-9 left-0 right-0 z-50 bg-brand-dark shadow-2xl shadow-black/40 border-b-2 border-brand-yellow/20">
+      <nav className="fixed top-9 left-0 right-0 z-50 bg-brand-dark shadow-2xl shadow-black/40">
         <div className="flex items-stretch h-20">
 
-          {/* Logo block — big yellow slab, clearly different from nav */}
+          {/* Logo block — yellow slab that bleeds into a diagonal cut */}
           <Link
             href="/"
-            className="flex items-center justify-center bg-brand-yellow px-8 flex-shrink-0 group hover:bg-yellow-300 transition-colors duration-200 shadow-[4px_0_16px_rgba(0,0,0,0.4)]"
-            style={{ minWidth: '200px' }}
+            className="logo-block relative flex items-center justify-center flex-shrink-0 group"
           >
+            {/* Yellow background with diagonal right edge */}
+            <span className="logo-slash absolute inset-0 bg-brand-yellow group-hover:bg-yellow-300 transition-colors duration-200" />
             <Image
               src="/logo.png"
               alt="JC Central Tire Shop"
-              width={180}
-              height={68}
-              className="h-14 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-200"
+              width={190}
+              height={72}
+              className="relative z-10 h-[4.25rem] w-auto object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-200 pr-4"
               priority
             />
           </Link>
