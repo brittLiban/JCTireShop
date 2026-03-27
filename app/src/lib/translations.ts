@@ -18,7 +18,6 @@ export const translations = {
       badges: {
         licensed: 'Licensed & Insured',
         sameDay: 'Same-Day Service',
-        rated: '5-Star Rated',
         expert: 'Expert Technicians',
       },
       stats: {
@@ -138,7 +137,6 @@ export const translations = {
       badges: {
         licensed: 'Licenciado y Asegurado',
         sameDay: 'Servicio el Mismo Día',
-        rated: 'Calificación 5 Estrellas',
         expert: 'Técnicos Expertos',
       },
       stats: {

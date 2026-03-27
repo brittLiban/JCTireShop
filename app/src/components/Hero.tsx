@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { ArrowRight, Shield, Clock, Star, Wrench, MapPin } from 'lucide-react'
+import { ArrowRight, Shield, Clock, Wrench, MapPin } from 'lucide-react'
 import Image from 'next/image'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { translations } from '@/lib/translations'
@@ -24,7 +24,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
 }
 
-const badgeIcons = [Shield, Clock, Star, Wrench]
+const badgeIcons = [Shield, Clock, Wrench]
 
 export default function Hero() {
   const { lang } = useLanguage()
@@ -41,7 +41,7 @@ export default function Hero() {
   const scrollTo = (id: string) =>
     document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' })
 
-  const badgeKeys = ['licensed', 'sameDay', 'rated', 'expert'] as const
+  const badgeKeys = ['licensed', 'sameDay', 'expert'] as const
 
   return (
     <section className="relative min-h-screen flex items-center bg-brand-dark overflow-hidden pt-[4.5rem]">
