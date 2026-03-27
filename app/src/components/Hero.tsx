@@ -52,7 +52,7 @@ export default function Hero() {
           key={src}
           className={`absolute inset-0 transition-opacity duration-1000 ${i === bgIndex ? 'opacity-55' : 'opacity-0'}`}
         >
-          <Image src={src} alt="" fill className="object-cover object-center" priority={i === 0} />
+          <Image src={src} alt="" fill className="object-cover object-top" priority={i === 0} />
         </div>
       ))}
 
@@ -135,7 +135,7 @@ export default function Hero() {
             >
               <div className="relative w-full h-52 sm:h-64">
                 <Image
-                  src="/frontpage.png"
+                  src="/logo/frontpage.png"
                   alt="JC Central Tire Shop — Kent, Washington"
                   fill
                   className="object-cover object-top"
@@ -187,10 +187,10 @@ export default function Hero() {
             <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
               <div className="relative w-full h-[480px] xl:h-[540px]">
                 <Image
-                  src="/frontpage.png"
+                  src="/logo/frontpage.png"
                   alt="JC Central Tire Shop — Kent, Washington"
                   fill
-                  className="object-cover object-center"
+                  className="object-cover object-top"
                   priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

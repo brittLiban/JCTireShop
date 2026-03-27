@@ -62,8 +62,8 @@ export default function Navbar() {
               className="relative z-10 h-[4.75rem] w-auto object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-200 pr-6"
               priority
             />
-            <span className="relative z-10 text-[10px] font-black uppercase tracking-widest text-black/70 pr-6 -mt-1">
-              Kent, WA&apos;s Tire Experts
+            <span className="relative z-10 text-[9px] font-semibold text-black/65 pr-6 -mt-0.5 text-center leading-tight max-w-[200px]">
+              Expert tire services, fair prices &amp; fast turnaround.<br />We keep your vehicle safe — every single time.
             </span>
           </Link>
 

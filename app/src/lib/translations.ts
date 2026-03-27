@@ -12,7 +12,7 @@ export const translations = {
       tag: 'Kent, Washington\'s Tire Experts',
       headline1: 'Tires You Can',
       headline2: 'Trust.',
-      sub: 'Expert tire services offering premium new and high-quality used tires. Professional installation and warranty included. Fast, reliable service — open 7 days a week.\n• Additional services available',
+      sub: 'New & used tires with warranty. Mount, balance, repair — done right, done fast. Walk-ins always welcome.\n• Open 7 days a week · Se Habla Español',
       cta1: 'Get a Free Quote',
       cta2: 'Call Us Now',
       badges: {
@@ -131,7 +131,7 @@ export const translations = {
       tag: 'Sus Expertos en Llantas en Kent, WA',
       headline1: 'Llantas en las que',
       headline2: 'Confiar.',
-      sub: 'Servicios expertos en llantas nuevas de alta calidad y llantas usadas seleccionadas. Instalación profesional y garantía incluida. Servicio rápido y confiable — abierto 7 días a la semana.\n• Servicios adicionales disponibles',
+      sub: 'Llantas nuevas y usadas con garantía. Montaje, balanceo, reparación — bien hecho y rápido. Sin cita previa.\n• Abierto 7 días · Se Habla Español',
       cta1: 'Obtener Cotización Gratis',
       cta2: 'Llamarnos Ahora',
       badges: {
