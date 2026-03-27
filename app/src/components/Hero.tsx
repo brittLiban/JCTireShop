@@ -119,19 +119,6 @@ export default function Hero() {
               </span>
             </motion.h1>
 
-            {/* Logo badge */}
-            <motion.div variants={itemVariants} className="mt-8">
-              <div className="inline-flex items-center gap-3 bg-brand-yellow rounded-2xl px-5 py-3 shadow-lg shadow-yellow-900/30">
-                <Image
-                  src="/logo.png"
-                  alt="JC Central Tire Shop"
-                  width={140}
-                  height={52}
-                  className="h-10 w-auto object-contain"
-                />
-              </div>
-            </motion.div>
-
             {/* Subtitle */}
             <motion.p
               variants={itemVariants}
