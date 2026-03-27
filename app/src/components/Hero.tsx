@@ -240,22 +240,43 @@ export default function Hero() {
 
         </div>
 
-        {/* Stats bar — 3 stats, no rating */}
+        {/* Stats bar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.6 }}
-          className="mt-16 grid grid-cols-3 gap-px bg-white/8 rounded-2xl overflow-hidden border border-white/8"
+          className="mt-16 rounded-2xl overflow-hidden border border-white/8"
         >
-          {(['years', 'tires', 'time'] as const).map((key) => (
-            <div
-              key={key}
-              className="bg-[#111]/80 backdrop-blur-sm px-6 py-5 text-center hover:bg-brand-yellow/10 transition-colors duration-300"
-            >
-              <div className="text-2xl sm:text-3xl font-black text-white">{t.stats[key].value}</div>
-              <div className="text-xs text-gray-500 mt-1 leading-tight">{t.stats[key].label}</div>
+          {/* Mobile: single clean strip */}
+          <div className="sm:hidden bg-[#111]/80 backdrop-blur-sm px-5 py-4 flex items-center justify-between gap-3">
+            <div className="text-center">
+              <div className="text-xl font-black text-white">10+</div>
+              <div className="text-[10px] text-gray-500 leading-tight">Yrs in Business</div>
             </div>
-          ))}
+            <div className="w-px h-8 bg-white/10" />
+            <div className="text-center">
+              <div className="text-xl font-black text-white">200K+</div>
+              <div className="text-[10px] text-gray-500 leading-tight">Tires Installed</div>
+            </div>
+            <div className="w-px h-8 bg-white/10" />
+            <div className="text-center flex-1">
+              <div className="text-brand-yellow font-black text-sm leading-tight">20–30 min</div>
+              <div className="text-[10px] text-gray-500 leading-tight">Avg. Install Time</div>
+            </div>
+          </div>
+
+          {/* Desktop: full 3-column grid */}
+          <div className="hidden sm:grid grid-cols-3 gap-px bg-white/8">
+            {(['years', 'tires', 'time'] as const).map((key) => (
+              <div
+                key={key}
+                className="bg-[#111]/80 backdrop-blur-sm px-6 py-5 text-center hover:bg-brand-yellow/10 transition-colors duration-300"
+              >
+                <div className="text-3xl font-black text-white">{t.stats[key].value}</div>
+                <div className="text-xs text-gray-500 mt-1 leading-tight">{t.stats[key].label}</div>
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
 
