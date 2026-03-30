@@ -133,12 +133,12 @@ export default function Hero() {
               variants={itemVariants}
               className="lg:hidden mt-8 rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative"
             >
-              <div className="relative w-full h-52 sm:h-64">
+              <div className="relative w-full h-80 sm:h-96">
                 <Image
                   src="/logo/frontpage.png"
                   alt="JC Central Tire Shop — Kent, Washington"
                   fill
-                  className="object-cover object-top"
+                  className="object-cover object-center"
                   priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
