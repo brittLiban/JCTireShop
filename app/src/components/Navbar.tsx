@@ -62,8 +62,8 @@ export default function Navbar() {
               className="relative z-10 h-[4.75rem] w-auto object-contain drop-shadow-lg group-hover:scale-105 transition-transform duration-200 pr-6"
               priority
             />
-            <span className="relative z-10 text-[9px] font-bold text-black/60 pr-6 -mt-0.5 tracking-widest uppercase whitespace-nowrap">
-              Fair Prices · Fast Service · Kent, WA
+            <span className="relative z-10 text-[9.5px] font-extrabold text-black/70 pr-6 -mt-0.5 tracking-widest uppercase whitespace-nowrap">
+              {t.tagline}
             </span>
           </Link>
 
