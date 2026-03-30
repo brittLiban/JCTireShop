@@ -122,7 +122,7 @@ export default function Hero() {
             {/* Subtitle */}
             <motion.div variants={itemVariants} className="mt-6 max-w-xl">
               {t.sub.split('\n').map((line, i) => (
-                <p key={i} className={`text-lg sm:text-xl leading-relaxed ${line.startsWith('•') ? 'text-brand-yellow font-semibold mt-2' : 'text-gray-400'}`}>
+                <p key={i} className={`text-lg sm:text-xl leading-relaxed drop-shadow-lg ${line.startsWith('•') ? 'text-brand-yellow font-bold mt-2' : 'text-white font-medium'}`}>
                   {line}
                 </p>
               ))}
