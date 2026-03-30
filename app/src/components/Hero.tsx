@@ -238,7 +238,7 @@ export default function Hero() {
           {/* Mobile: single clean strip */}
           <div className="sm:hidden bg-[#111]/80 backdrop-blur-sm px-5 py-4 flex items-center justify-between gap-3">
             <div className="text-center">
-              <div className="text-xl font-black text-white">10+</div>
+              <div className="text-xl font-black text-white">15+</div>
               <div className="text-[10px] text-gray-500 leading-tight">Yrs in Business</div>
             </div>
             <div className="w-px h-8 bg-white/10" />
