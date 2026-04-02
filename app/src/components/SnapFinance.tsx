@@ -19,7 +19,7 @@ export default function SnapFinance() {
           initial={{ opacity: 0, y: 24 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="flex flex-col lg:flex-row items-center gap-12"
+          className="flex flex-col-reverse lg:flex-row items-center gap-12"
         >
           {/* Left — text */}
           <div className="flex-1 max-w-lg">
@@ -76,14 +76,14 @@ export default function SnapFinance() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={inView ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.15 }}
-            className="flex-shrink-0 w-64 sm:w-72"
+            className="flex-shrink-0 w-80 sm:w-96"
           >
-            <div className="rounded-3xl overflow-hidden shadow-2xl border border-gray-100">
+            <div className="rounded-3xl overflow-hidden shadow-2xl">
               <Image
                 src={lang === 'en' ? '/snap-en.png' : '/snap-es.png'}
                 alt="Snap Finance — Get approved for up to $5,000"
-                width={400}
-                height={600}
+                width={500}
+                height={700}
                 className="w-full h-auto object-contain"
               />
             </div>

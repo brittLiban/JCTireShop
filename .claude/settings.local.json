@@ -4,7 +4,8 @@
       "Bash(docker compose:*)",
       "Bash(python -:*)",
       "Bash(docker info:*)",
-      "Bash(docker context:*)"
+      "Bash(docker context:*)",
+      "Bash(python3 -c \":*)"
     ]
   }
 }
