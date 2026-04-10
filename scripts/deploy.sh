@@ -82,15 +82,14 @@ log "Code up to date"
 step "Environment configuration"
 
 if [[ ! -f "$JCTIRE_DIR/.env" ]]; then
-    [[ -f "$JCTIRE_DIR/.env.example" ]] || die ".env.example not found — cannot create .env"
+    [[ -f "$JCTIRE_DIR/.env.example" ]] || die ".env.example not found"
     cp "$JCTIRE_DIR/.env.example" "$JCTIRE_DIR/.env"
-    warn ".env not found — opening editor. Fill in all values, then save and exit."
-    echo ""
-    echo -e "  ${DIM}Tip: for NEXTAUTH_SECRET run: openssl rand -base64 32${NC}"
-    echo ""
-    read -rp "  Press ENTER to open .env in nano..."
-    nano "$JCTIRE_DIR/.env"
-    log ".env saved"
+
+    # Auto-generate a secure NEXTAUTH_SECRET
+    SECRET=$(openssl rand -base64 32)
+    sed -i "s|REPLACE_WITH_GENERATED_SECRET|$SECRET|" "$JCTIRE_DIR/.env"
+
+    log ".env created with auto-generated credentials"
 else
     log ".env already exists — skipping"
 fi
