@@ -87,7 +87,7 @@ export default function Testimonials({ reviews }: { reviews: GoogleReview[] }) {
     : 5
 
   return (
-    <section id="testimonials" className="py-28 bg-white">
+    <section id="testimonials" className="py-14 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <motion.div

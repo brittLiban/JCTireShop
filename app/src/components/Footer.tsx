@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { Phone, MapPin, Clock, Instagram } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { translations } from '@/lib/translations'
@@ -24,9 +23,6 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="lg:col-span-1">
-            <div className="mb-4">
-              <Image src="/logo.png" alt="JC Central Tire Shop" width={140} height={52} className="h-11 w-auto object-contain" />
-            </div>
             <p className="text-sm leading-relaxed">{t.tagline}</p>
           </div>
 
