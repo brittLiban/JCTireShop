@@ -26,7 +26,7 @@ step() { echo -e "\n${BOLD}${BLUE}── $1${NC}"; }
 # ── constants ─────────────────────────────────────────────────────────────────
 PROXY_DIR=/root/proxy
 JCTIRE_DIR=/root/jctireshop
-DOMAIN=jctireshop.com
+DOMAIN=jctiresshop.com
 
 # ── root check ────────────────────────────────────────────────────────────────
 [[ $EUID -ne 0 ]] && die "Run as root (sudo -i or from root shell)"
@@ -159,7 +159,7 @@ else
     # Append jctireshop server block before the closing brace of http {}
     # We insert it at the end of the file (before last })
     JCTIRE_BLOCK="
-  # jctireshop.com
+  # jctiresshop.com
   server {
     listen 443 ssl;
     server_name $DOMAIN www.$DOMAIN;

@@ -4,7 +4,7 @@
 # Run this ONCE on your VM before starting the production stack.
 #
 # Usage: ./scripts/init-ssl.sh <domain> <email>
-# Example: ./scripts/init-ssl.sh jctireshop.com owner@jctireshop.com
+# Example: ./scripts/init-ssl.sh jctiresshop.com owner@jctiresshop.com
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -e
@@ -14,7 +14,7 @@ EMAIL=$2
 
 if [ -z "$DOMAIN" ] || [ -z "$EMAIL" ]; then
   echo "Usage: $0 <domain> <email>"
-  echo "Example: $0 jctireshop.com owner@jctireshop.com"
+  echo "Example: $0 jctiresshop.com owner@jctiresshop.com"
   exit 1
 fi
 
