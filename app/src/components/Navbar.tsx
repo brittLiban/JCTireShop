@@ -97,7 +97,7 @@ export default function Navbar() {
               </button>
 
               <a
-                href="tel:+15551234567"
+                href="tel:+12538138473"
                 className="flex items-center gap-2 bg-brand-yellow text-black px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-yellow-400 transition-all shadow-lg shadow-yellow-900/20 active:scale-95"
               >
                 <Phone size={13} />
@@ -145,7 +145,7 @@ export default function Navbar() {
               </a>
             ))}
             <a
-              href="tel:+15551234567"
+              href="tel:+12538138473"
               className="btn-primary w-full text-center mt-3 py-3.5"
             >
               <Phone size={16} />

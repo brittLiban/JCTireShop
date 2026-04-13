@@ -101,7 +101,7 @@ export default function Services() {
             <p className="text-white font-black text-xl tracking-tight">{t.ctaTitle}</p>
             <p className="text-gray-400 text-sm mt-1">{t.ctaSub}</p>
           </div>
-          <a href="tel:+15551234567" className="btn-primary flex-shrink-0 px-8 py-4 text-base relative">
+          <a href="tel:+12538138473" className="btn-primary flex-shrink-0 px-8 py-4 text-base relative">
             {t.ctaBtn}
           </a>
         </motion.div>
