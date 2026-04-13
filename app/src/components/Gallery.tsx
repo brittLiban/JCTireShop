@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Camera } from 'lucide-react'
+import { Camera, X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 // ─── ADD YOUR PHOTOS HERE ───────────────────────────────────────────────────
 // Drop photo files into  /app/public/gallery/
 // Then add the filenames to this array below.
-// Example: '/gallery/my-shop.jpg'
 const photos: { src: string; alt: string }[] = [
   { src: '/gallery/p1.jpeg', alt: 'JC Central Tire Shop' },
   { src: '/gallery/p2.jpeg', alt: 'JC Central Tire Shop' },
@@ -18,7 +17,6 @@ const photos: { src: string; alt: string }[] = [
 ]
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Placeholder tiles shown until real photos are added
 const placeholderCount = 8
 
 function PlaceholderTile({ index }: { index: number }) {
@@ -42,27 +40,106 @@ function PlaceholderTile({ index }: { index: number }) {
   )
 }
 
-function GalleryTile({ src, alt }: { src: string; alt: string }) {
+function GalleryTile({ src, alt, onClick }: { src: string; alt: string; onClick: () => void }) {
   const [error, setError] = useState(false)
   if (error) return <PlaceholderTile index={0} />
   return (
-    <div className="relative w-72 h-52 flex-shrink-0 rounded-2xl overflow-hidden">
+    <div
+      className="relative w-72 h-52 flex-shrink-0 rounded-2xl overflow-hidden cursor-zoom-in group"
+      onClick={onClick}
+    >
       <Image
         src={src}
         alt={alt}
         fill
-        className="object-cover object-bottom scale-125 hover:scale-[1.35] transition-transform duration-700"
+        className="object-cover object-bottom scale-125 group-hover:scale-[1.35] transition-transform duration-700"
         onError={() => setError(true)}
       />
+      {/* zoom hint overlay */}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60 text-white text-xs font-bold px-3 py-1.5 rounded-full tracking-wide">
+          Tap to zoom
+        </span>
+      </div>
     </div>
   )
 }
 
+// ─── Lightbox ────────────────────────────────────────────────────────────────
+function Lightbox({ photos, index, onClose }: { photos: { src: string; alt: string }[]; index: number; onClose: () => void }) {
+  const [current, setCurrent] = useState(index)
+
+  const prev = () => setCurrent((c) => (c - 1 + photos.length) % photos.length)
+  const next = () => setCurrent((c) => (c + 1) % photos.length)
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+      onClick={onClose}
+    >
+      {/* Close */}
+      <button
+        type="button"
+        aria-label="Close"
+        className="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors z-10"
+        onClick={onClose}
+      >
+        <X size={24} />
+      </button>
+
+      {/* Prev */}
+      {photos.length > 1 && (
+        <button
+          type="button"
+          aria-label="Previous photo"
+          className="absolute left-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors z-10"
+          onClick={(e) => { e.stopPropagation(); prev() }}
+        >
+          <ChevronLeft size={28} />
+        </button>
+      )}
+
+      {/* Image */}
+      <div
+        className="relative w-full max-w-4xl max-h-[85vh] mx-16 aspect-video"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Image
+          src={photos[current].src}
+          alt={photos[current].alt}
+          fill
+          className="object-contain"
+          sizes="100vw"
+        />
+      </div>
+
+      {/* Next */}
+      {photos.length > 1 && (
+        <button
+          type="button"
+          aria-label="Next photo"
+          className="absolute right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors z-10"
+          onClick={(e) => { e.stopPropagation(); next() }}
+        >
+          <ChevronRight size={28} />
+        </button>
+      )}
+
+      {/* Counter */}
+      <p className="absolute bottom-4 text-white/50 text-sm">
+        {current + 1} / {photos.length}
+      </p>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const items = photos.length > 0 ? photos : Array.from({ length: placeholderCount }, (_, i) => ({ src: '', alt: '', index: i }))
 
 export default function Gallery() {
-  // Double the array for seamless infinite scroll
   const doubled = [...items, ...items]
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   return (
     <section className="py-20 bg-brand-dark overflow-hidden">
@@ -80,13 +157,26 @@ export default function Gallery() {
       <div className="flex gap-4 w-max animate-marquee hover:[animation-play-state:paused] pl-4">
         {doubled.map((item, i) =>
           'src' in item && item.src ? (
-            <GalleryTile key={i} src={item.src} alt={item.alt} />
+            <GalleryTile
+              key={i}
+              src={item.src}
+              alt={item.alt}
+              onClick={() => setLightboxIndex(i % photos.length)}
+            />
           ) : (
             <PlaceholderTile key={i} index={i % placeholderCount} />
           )
         )}
       </div>
 
+      {/* Lightbox */}
+      {lightboxIndex !== null && (
+        <Lightbox
+          photos={photos}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
     </section>
   )
 }
