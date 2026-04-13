@@ -101,14 +101,14 @@ function Lightbox({ photos, index, onClose }: { photos: { src: string; alt: stri
 
       {/* Image */}
       <div
-        className="relative w-full max-w-4xl max-h-[85vh] mx-16 aspect-video"
+        className="relative w-full max-w-5xl max-h-[90vh] mx-12 aspect-video"
         onClick={(e) => e.stopPropagation()}
       >
         <Image
           src={photos[current].src}
           alt={photos[current].alt}
           fill
-          className="object-contain"
+          className="object-cover scale-110"
           sizes="100vw"
         />
       </div>
