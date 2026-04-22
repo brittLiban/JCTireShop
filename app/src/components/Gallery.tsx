@@ -14,6 +14,21 @@ const photos: { src: string; alt: string }[] = [
   { src: '/gallery/p4.jpeg', alt: 'JC Central Tire Shop' },
   { src: '/gallery/p5.jpeg', alt: 'JC Central Tire Shop' },
   { src: '/gallery/p6.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p8.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p9.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p10.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p11.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p12.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p13.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p14.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p15.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p16.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p17.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p18.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p19.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p20.jpeg', alt: 'JC Central Tire Shop' },
+
 ]
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -5,7 +5,10 @@
       "Bash(python -:*)",
       "Bash(docker info:*)",
       "Bash(docker context:*)",
-      "Bash(python3 -c \":*)"
+      "Bash(python3 -c \":*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)"
     ]
   }
 }
