@@ -14,7 +14,7 @@ const photos: { src: string; alt: string }[] = [
   { src: '/gallery/p4.jpeg', alt: 'JC Central Tire Shop' },
   { src: '/gallery/p5.jpeg', alt: 'JC Central Tire Shop' },
   { src: '/gallery/p6.jpeg', alt: 'JC Central Tire Shop' },
-  { src: '/gallery/p.jpeg', alt: 'JC Central Tire Shop' },
+  { src: '/gallery/p7.jpeg', alt: 'JC Central Tire Shop' },
   { src: '/gallery/p8.jpeg', alt: 'JC Central Tire Shop' },
   { src: '/gallery/p9.jpeg', alt: 'JC Central Tire Shop' },
   { src: '/gallery/p10.jpeg', alt: 'JC Central Tire Shop' },
