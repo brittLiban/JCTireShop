@@ -68,14 +68,54 @@ function GalleryTile({ src, alt, onClick }: { src: string; alt: string; onClick:
 // ─── Lightbox ────────────────────────────────────────────────────────────────
 function Lightbox({ photos, index, onClose }: { photos: { src: string; alt: string }[]; index: number; onClose: () => void }) {
   const [current, setCurrent] = useState(index)
+  const [zoom, setZoom] = useState(1)
+  const [panX, setPanX] = useState(0)
+  const [panY, setPanY] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
 
-  const prev = () => setCurrent((c) => (c - 1 + photos.length) % photos.length)
-  const next = () => setCurrent((c) => (c + 1) % photos.length)
+  const prev = () => { setCurrent((c) => (c - 1 + photos.length) % photos.length); resetZoom() }
+  const next = () => { setCurrent((c) => (c + 1) % photos.length); resetZoom() }
+  
+  const resetZoom = () => {
+    setZoom(1)
+    setPanX(0)
+    setPanY(0)
+  }
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const delta = e.deltaY > 0 ? 0.9 : 1.1
+    setZoom((z) => Math.max(1, Math.min(5, z * delta)))
+  }
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoom > 1) {
+      setIsDragging(true)
+      setDragStart({ x: e.clientX - panX, y: e.clientY - panY })
+    }
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      setPanX(e.clientX - dragStart.x)
+      setPanY(e.clientY - dragStart.y)
+    }
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
 
   return (
     <div
-      className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+      className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center overflow-hidden"
       onClick={onClose}
+      onWheel={handleWheel}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
     >
       {/* Close */}
       <button
@@ -99,18 +139,35 @@ function Lightbox({ photos, index, onClose }: { photos: { src: string; alt: stri
         </button>
       )}
 
-      {/* Image */}
+      {/* Image Container */}
       <div
-        className="relative w-full max-w-5xl max-h-[90vh] mx-12 aspect-video"
+        className="relative w-full max-w-5xl max-h-[90vh] mx-12 aspect-video overflow-hidden"
         onClick={(e) => e.stopPropagation()}
+        onMouseDown={handleMouseDown}
       >
-        <Image
-          src={photos[current].src}
-          alt={photos[current].alt}
-          fill
-          className="object-contain"
-          sizes="100vw"
-        />
+        <div
+          style={{
+            transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
+            transformOrigin: 'center',
+            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+            cursor: zoom > 1 ? 'grab' : 'zoom-in',
+          }}
+          className="w-full h-full"
+        >
+          <Image
+            src={photos[current].src}
+            alt={photos[current].alt}
+            fill
+            className="object-contain"
+            sizes="100vw"
+            draggable={false}
+          />
+        </div>
+        {zoom > 1 && (
+          <div className="absolute bottom-4 left-4 bg-black/60 text-white text-xs px-3 py-1 rounded">
+            Scroll to zoom • Drag to pan
+          </div>
+        )}
       </div>
 
       {/* Next */}
