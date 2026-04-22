@@ -108,7 +108,7 @@ function Lightbox({ photos, index, onClose }: { photos: { src: string; alt: stri
           src={photos[current].src}
           alt={photos[current].alt}
           fill
-          className="object-cover object-bottom scale-110"
+          className="object-cover object-center"
           sizes="100vw"
         />
       </div>
