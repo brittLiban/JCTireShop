@@ -23,8 +23,8 @@ export default async function AdminLayout({
     <SessionProvider session={session}>
       <div className="min-h-screen bg-gray-50 flex">
         <AdminNav />
-        <main className="flex-1 overflow-auto">
-          <div className="p-6 md:p-10 max-w-7xl">{children}</div>
+        <main className="flex-1 overflow-auto pt-14 sm:pt-0">
+          <div className="p-4 sm:p-6 md:p-10 max-w-7xl">{children}</div>
         </main>
       </div>
     </SessionProvider>
