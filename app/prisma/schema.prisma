@@ -20,24 +20,78 @@ model ContactSubmission {
   @@index([read])
 }
 
-model Tire {
+model Container {
   id        String   @id @default(cuid())
-  brand     String
-  model     String
-  width     Int
-  aspect    Int
-  diameter  Int
-  quantity  Int      @default(0)
-  cost      Decimal  @db.Decimal(10, 2)
-  price     Decimal  @db.Decimal(10, 2)
-  location  String?
+  name      String   @unique
   notes     String?
+  capacity  Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  tires     Tire[]
+}
+
+model Tire {
+  id          String     @id @default(cuid())
+  sku         String?    @unique
+  brand       String
+  model       String
+  width       Int
+  aspect      Int
+  diameter    Int
+  quantity    Int        @default(0)
+  cost        Decimal    @db.Decimal(10, 2)
+  price       Decimal    @db.Decimal(10, 2)
+  location    String?
+  notes       String?
+  containerId String?
+  container   Container? @relation(fields: [containerId], references: [id], onDelete: SetNull)
+  scanLogs    ScanLog[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   @@index([brand])
   @@index([width, aspect, diameter])
   @@index([quantity])
+  @@index([sku])
+}
+
+model ScanLog {
+  id           String   @id @default(cuid())
+  tireId       String?
+  tire         Tire?    @relation(fields: [tireId], references: [id], onDelete: SetNull)
+  scannedValue String
+  scanType     ScanType
+  location     String?
+  userId       String?
+  userEmail    String?
+  qtyBefore    Int?
+  qtyAfter     Int?
+  success      Boolean  @default(true)
+  errorMessage String?
+  createdAt    DateTime @default(now())
+
+  @@index([tireId])
+  @@index([createdAt])
+  @@index([scanType])
+  @@index([success])
+}
+
+model ImportJob {
+  id            String       @id @default(cuid())
+  fileName      String
+  status        ImportStatus @default(PENDING)
+  importType    String
+  rowsProcessed Int          @default(0)
+  rowsSuccess   Int          @default(0)
+  rowsError     Int          @default(0)
+  errors        Json?
+  uploadedBy    String?
+  columnMapping Json?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 model SupplierOrder {
@@ -63,4 +117,17 @@ enum OrderStatus {
   SHIPPED
   RECEIVED
   CANCELLED
+}
+
+enum ScanType {
+  RECEIVE
+  REMOVE
+  AUDIT
+}
+
+enum ImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }

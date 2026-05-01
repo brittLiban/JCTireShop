@@ -5,18 +5,9 @@ import { prisma } from '@/lib/db'
 import { z } from 'zod'
 
 const schema = z.object({
-  sku:         z.string().max(100).optional().nullable(),
-  brand:       z.string().min(1).max(100).optional(),
-  model:       z.string().min(1).max(100).optional(),
-  width:       z.coerce.number().int().positive().optional(),
-  aspect:      z.coerce.number().int().positive().optional(),
-  diameter:    z.coerce.number().int().positive().optional(),
-  quantity:    z.coerce.number().int().min(0).optional(),
-  cost:        z.coerce.number().positive().optional(),
-  price:       z.coerce.number().positive().optional(),
-  location:    z.string().max(100).optional().nullable(),
-  notes:       z.string().max(500).optional().nullable(),
-  containerId: z.string().optional().nullable(),
+  name:     z.string().min(1).max(100).optional(),
+  notes:    z.string().max(500).optional().nullable(),
+  capacity: z.coerce.number().int().positive().optional().nullable(),
 })
 
 async function requireAuth() {
@@ -32,11 +23,11 @@ export async function PUT(
   }
   try {
     const body = schema.parse(await req.json())
-    const tire = await prisma.tire.update({
+    const container = await prisma.container.update({
       where: { id: params.id },
       data: body,
     })
-    return NextResponse.json(tire)
+    return NextResponse.json(container)
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: err.issues }, { status: 400 })
@@ -54,7 +45,20 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   try {
-    await prisma.tire.delete({ where: { id: params.id } })
+    const container = await prisma.container.findUnique({
+      where: { id: params.id },
+      include: { _count: { select: { tires: true } } },
+    })
+    if (!container) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+    if (container._count.tires > 0) {
+      return NextResponse.json(
+        { error: `Cannot delete — ${container._count.tires} tire(s) still assigned. Reassign them first.` },
+        { status: 409 }
+      )
+    }
+    await prisma.container.delete({ where: { id: params.id } })
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error(err)

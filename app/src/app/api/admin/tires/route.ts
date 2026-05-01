@@ -5,16 +5,18 @@ import { prisma } from '@/lib/db'
 import { z } from 'zod'
 
 const schema = z.object({
-  brand: z.string().min(1).max(100),
-  model: z.string().min(1).max(100),
-  width: z.coerce.number().int().positive(),
-  aspect: z.coerce.number().int().positive(),
-  diameter: z.coerce.number().int().positive(),
-  quantity: z.coerce.number().int().min(0),
-  cost: z.coerce.number().positive(),
-  price: z.coerce.number().positive(),
-  location: z.string().max(100).optional(),
-  notes: z.string().max(500).optional(),
+  sku:         z.string().max(100).optional().nullable(),
+  brand:       z.string().min(1).max(100),
+  model:       z.string().min(1).max(100),
+  width:       z.coerce.number().int().positive(),
+  aspect:      z.coerce.number().int().positive(),
+  diameter:    z.coerce.number().int().positive(),
+  quantity:    z.coerce.number().int().min(0),
+  cost:        z.coerce.number().positive(),
+  price:       z.coerce.number().positive(),
+  location:    z.string().max(100).optional().nullable(),
+  notes:       z.string().max(500).optional().nullable(),
+  containerId: z.string().optional().nullable(),
 })
 
 async function requireAuth() {

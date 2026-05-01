@@ -3,13 +3,35 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
-import { LayoutDashboard, Package, Truck, LogOut, ExternalLink } from 'lucide-react'
+import {
+  LayoutDashboard, Package, Truck, LogOut, ExternalLink,
+  ScanLine, Box, Upload, ClipboardList,
+} from 'lucide-react'
 import { clsx } from 'clsx'
 
-const navItems = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/admin/inventory', label: 'Inventory', icon: Package, exact: false },
-  { href: '/admin/orders', label: 'Supplier Orders', icon: Truck, exact: false },
+const navGroups = [
+  {
+    label: null,
+    items: [
+      { href: '/admin',           label: 'Dashboard',      icon: LayoutDashboard, exact: true },
+      { href: '/admin/inventory', label: 'Inventory',      icon: Package,         exact: false },
+      { href: '/admin/orders',    label: 'Supplier Orders', icon: Truck,           exact: false },
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
+      { href: '/admin/scan',       label: 'Scan Inventory', icon: ScanLine,       exact: false },
+      { href: '/admin/containers', label: 'Containers',     icon: Box,            exact: false },
+    ],
+  },
+  {
+    label: 'Data',
+    items: [
+      { href: '/admin/import',   label: 'Excel Import', icon: Upload,        exact: false },
+      { href: '/admin/scan-log', label: 'Scan Log',     icon: ClipboardList, exact: false },
+    ],
+  },
 ]
 
 export default function AdminNav() {
@@ -32,25 +54,36 @@ export default function AdminNav() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
-        {navItems.map(({ href, label, icon: Icon, exact }) => {
-          const active = exact ? pathname === href : pathname.startsWith(href)
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={clsx(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
-                active
-                  ? 'bg-brand-red text-white shadow-lg shadow-red-900/20'
-                  : 'text-gray-400 hover:text-white hover:bg-white/8'
-              )}
-            >
-              <Icon size={16} />
-              {label}
-            </Link>
-          )
-        })}
+      <nav className="flex-1 p-4 space-y-4 overflow-y-auto">
+        {navGroups.map((group, gi) => (
+          <div key={gi}>
+            {group.label && (
+              <p className="px-3 mb-1 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
+                {group.label}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {group.items.map(({ href, label, icon: Icon, exact }) => {
+                const active = exact ? pathname === href : pathname.startsWith(href)
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={clsx(
+                      'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
+                      active
+                        ? 'bg-brand-red text-white shadow-lg shadow-red-900/20'
+                        : 'text-gray-400 hover:text-white hover:bg-white/8'
+                    )}
+                  >
+                    <Icon size={16} />
+                    {label}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Bottom section */}
