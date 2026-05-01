@@ -1,11 +1,18 @@
--- CreateEnum
-CREATE TYPE "ScanType" AS ENUM ('RECEIVE', 'REMOVE', 'AUDIT');
+-- Safe idempotent migration (handles partial db push state)
 
--- CreateEnum
-CREATE TYPE "ImportStatus" AS ENUM ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED');
+-- CreateEnum (safe if already exists)
+DO $$ BEGIN
+  CREATE TYPE "ScanType" AS ENUM ('RECEIVE', 'REMOVE', 'AUDIT');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- CreateTable
-CREATE TABLE "Container" (
+DO $$ BEGIN
+  CREATE TYPE "ImportStatus" AS ENUM ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- CreateTable Container
+CREATE TABLE IF NOT EXISTS "Container" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "notes" TEXT,
@@ -16,8 +23,8 @@ CREATE TABLE "Container" (
     CONSTRAINT "Container_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "ScanLog" (
+-- CreateTable ScanLog
+CREATE TABLE IF NOT EXISTS "ScanLog" (
     "id" TEXT NOT NULL,
     "tireId" TEXT,
     "scannedValue" TEXT NOT NULL,
@@ -34,8 +41,8 @@ CREATE TABLE "ScanLog" (
     CONSTRAINT "ScanLog_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "ImportJob" (
+-- CreateTable ImportJob
+CREATE TABLE IF NOT EXISTS "ImportJob" (
     "id" TEXT NOT NULL,
     "fileName" TEXT NOT NULL,
     "status" "ImportStatus" NOT NULL DEFAULT 'PENDING',
@@ -52,41 +59,38 @@ CREATE TABLE "ImportJob" (
     CONSTRAINT "ImportJob_pkey" PRIMARY KEY ("id")
 );
 
--- AlterTable
-ALTER TABLE "Tire" ADD COLUMN "sku" TEXT,
-                   ADD COLUMN "containerId" TEXT;
+-- AlterTable Tire: add sku (safe)
+DO $$ BEGIN
+  ALTER TABLE "Tire" ADD COLUMN "sku" TEXT;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
 
--- CreateIndex
-CREATE UNIQUE INDEX "Container_name_key" ON "Container"("name");
+-- AlterTable Tire: add containerId (safe)
+DO $$ BEGIN
+  ALTER TABLE "Tire" ADD COLUMN "containerId" TEXT;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
 
--- CreateIndex
-CREATE UNIQUE INDEX "Tire_sku_key" ON "Tire"("sku");
+-- Indexes (all safe)
+CREATE UNIQUE INDEX IF NOT EXISTS "Container_name_key" ON "Container"("name");
+CREATE UNIQUE INDEX IF NOT EXISTS "Tire_sku_key" ON "Tire"("sku");
+CREATE INDEX IF NOT EXISTS "Tire_sku_idx" ON "Tire"("sku");
+CREATE INDEX IF NOT EXISTS "ScanLog_tireId_idx" ON "ScanLog"("tireId");
+CREATE INDEX IF NOT EXISTS "ScanLog_createdAt_idx" ON "ScanLog"("createdAt");
+CREATE INDEX IF NOT EXISTS "ScanLog_scanType_idx" ON "ScanLog"("scanType");
+CREATE INDEX IF NOT EXISTS "ScanLog_success_idx" ON "ScanLog"("success");
+CREATE INDEX IF NOT EXISTS "ImportJob_status_idx" ON "ImportJob"("status");
+CREATE INDEX IF NOT EXISTS "ImportJob_createdAt_idx" ON "ImportJob"("createdAt");
 
--- CreateIndex
-CREATE INDEX "Tire_sku_idx" ON "Tire"("sku");
+-- Foreign keys (safe)
+DO $$ BEGIN
+  ALTER TABLE "Tire" ADD CONSTRAINT "Tire_containerId_fkey"
+    FOREIGN KEY ("containerId") REFERENCES "Container"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- CreateIndex
-CREATE INDEX "ScanLog_tireId_idx" ON "ScanLog"("tireId");
-
--- CreateIndex
-CREATE INDEX "ScanLog_createdAt_idx" ON "ScanLog"("createdAt");
-
--- CreateIndex
-CREATE INDEX "ScanLog_scanType_idx" ON "ScanLog"("scanType");
-
--- CreateIndex
-CREATE INDEX "ScanLog_success_idx" ON "ScanLog"("success");
-
--- CreateIndex
-CREATE INDEX "ImportJob_status_idx" ON "ImportJob"("status");
-
--- CreateIndex
-CREATE INDEX "ImportJob_createdAt_idx" ON "ImportJob"("createdAt");
-
--- AddForeignKey
-ALTER TABLE "Tire" ADD CONSTRAINT "Tire_containerId_fkey"
-  FOREIGN KEY ("containerId") REFERENCES "Container"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ScanLog" ADD CONSTRAINT "ScanLog_tireId_fkey"
-  FOREIGN KEY ("tireId") REFERENCES "Tire"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "ScanLog" ADD CONSTRAINT "ScanLog_tireId_fkey"
+    FOREIGN KEY ("tireId") REFERENCES "Tire"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
