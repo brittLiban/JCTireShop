@@ -42,7 +42,6 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 type StockFilter = 'all' | 'in-stock' | 'low' | 'out' | 'single' | 'pair' | 'set'
 
-// Parse "225/65R17" or "225 65 17" or "22565r17" into {width,aspect,diameter}
 function parseSizeQuery(q: string): { width?: number; aspect?: number; diameter?: number } {
   const clean = q.replace(/[rR]/g, ' ').replace(/[/,]/g, ' ').trim()
   const parts = clean.split(/\s+/).map(Number).filter((n) => !isNaN(n) && n > 0)
@@ -97,7 +96,6 @@ export default function InventoryPage() {
 
   useEffect(() => { fetchTires() }, [fetchTires])
 
-  // Smart filter
   const filtered = tires.filter((t) => {
     if (filter === 'in-stock' && t.quantity <= 4) return false
     if (filter === 'low'      && !(t.quantity > 0 && t.quantity <= 4)) return false
@@ -125,7 +123,6 @@ export default function InventoryPage() {
     )
   })
 
-  // Quick qty +/-
   const adjustQty = async (t: Tire, delta: number) => {
     const newQty = Math.max(0, t.quantity + delta)
     setAdjusting(t.id)
@@ -196,7 +193,6 @@ export default function InventoryPage() {
     }
   }
 
-  // Analytics
   const fmt        = (n: number) => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
   const totalUnits = tires.reduce((s, t) => s + t.quantity, 0)
   const costVal    = tires.reduce((s, t) => s + parseFloat(t.cost)  * t.quantity, 0)
@@ -210,15 +206,15 @@ export default function InventoryPage() {
   const setCount    = tires.filter((t) => t.quantity >= 4).length
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-black text-brand-dark">Inventory</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <h1 className="text-xl sm:text-2xl font-black text-brand-dark">Inventory</h1>
+          <p className="text-gray-500 text-xs sm:text-sm mt-1">
             {tires.length} SKU{tires.length !== 1 ? 's' : ''} · {totalUnits} total units
-            {outCount > 0 && <span className="ml-2 text-red-500 font-semibold">· {outCount} out of stock</span>}
+            {outCount > 0 && <span className="ml-2 text-red-500 font-semibold">· {outCount} out</span>}
             {lowCount > 0 && <span className="ml-2 text-yellow-600 font-semibold">· {lowCount} low</span>}
           </p>
         </div>
@@ -228,52 +224,50 @@ export default function InventoryPage() {
       </div>
 
       {/* HERO SEARCH */}
-      <div className="bg-brand-dark rounded-2xl p-6">
+      <div className="bg-brand-dark rounded-2xl p-4 sm:p-6">
         <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">Quick Stock Lookup</p>
         <div className="relative">
-          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
           <input
             type="text"
-            placeholder='Brand, model, location — or tire size like "225/65R17" or "225 65 17"'
+            placeholder='Brand, model, or size like "225/65R17"'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-brand-gray border border-white/10 rounded-xl pl-12 pr-10 py-3.5 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-brand-yellow"
+            className="w-full bg-brand-gray border border-white/10 rounded-xl pl-10 pr-10 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-brand-yellow"
           />
           {search && (
             <button
               type="button"
               aria-label="Clear search"
               onClick={() => setSearch('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
             >
               <X size={16} />
             </button>
           )}
         </div>
 
-        {/* Live result summary */}
         {search && (
           <p className="text-sm mt-3 min-h-[1.25rem]">
             {filtered.length === 0 ? (
-              <span className="text-red-400 font-semibold">No tires found for &quot;{search}&quot;</span>
+              <span className="text-red-400 font-semibold">No results for &quot;{search}&quot;</span>
             ) : (
               <span className="text-gray-400">
-                <span className="text-white font-bold">{filtered.length}</span> tire{filtered.length !== 1 ? 's' : ''} match &quot;{search}&quot;
-                {filtered.some((t) => t.quantity >= 4) && <span className="text-emerald-400 font-semibold ml-2">· Full set available ✓</span>}
-                {filtered.some((t) => t.quantity >= 2) && !filtered.some((t) => t.quantity >= 4) && <span className="text-purple-400 font-semibold ml-2">· Pair available ✓</span>}
+                <span className="text-white font-bold">{filtered.length}</span> match{filtered.length !== 1 ? 'es' : ''}
+                {filtered.some((t) => t.quantity >= 4) && <span className="text-emerald-400 font-semibold ml-2">· Full set ✓</span>}
+                {filtered.some((t) => t.quantity >= 2) && !filtered.some((t) => t.quantity >= 4) && <span className="text-purple-400 font-semibold ml-2">· Pair ✓</span>}
                 {filtered.every((t) => t.quantity === 0) && <span className="text-red-400 font-semibold ml-2">· All out of stock</span>}
               </span>
             )}
           </p>
         )}
 
-        {/* Quick unit filter inside search bar */}
         <div className="flex items-center gap-2 mt-4 flex-wrap">
-          <span className="text-gray-600 text-xs font-semibold">Show me tires with:</span>
+          <span className="text-gray-600 text-xs font-semibold">Show:</span>
           {([
-            { key: 'single', label: '1 — Single',   color: 'border-blue-400 text-blue-400',    active: 'bg-blue-500 text-white border-blue-500' },
-            { key: 'pair',   label: '2+ — Pair',     color: 'border-purple-400 text-purple-400', active: 'bg-purple-500 text-white border-purple-500' },
-            { key: 'set',    label: '4+ — Full Set', color: 'border-emerald-400 text-emerald-400', active: 'bg-emerald-500 text-white border-emerald-500' },
+            { key: 'single', label: 'Singles',  color: 'border-blue-400 text-blue-400',    active: 'bg-blue-500 text-white border-blue-500' },
+            { key: 'pair',   label: 'Pairs+',   color: 'border-purple-400 text-purple-400', active: 'bg-purple-500 text-white border-purple-500' },
+            { key: 'set',    label: 'Full Sets', color: 'border-emerald-400 text-emerald-400', active: 'bg-emerald-500 text-white border-emerald-500' },
           ] as { key: StockFilter; label: string; color: string; active: string }[]).map(({ key, label, color, active }) => (
             <button
               key={key}
@@ -305,72 +299,72 @@ export default function InventoryPage() {
           { icon: Package,    label: 'Total Units',              value: totalUnits.toString(), color: 'bg-blue-50 text-blue-600' },
           { icon: DollarSign, label: 'Cost Value',               value: `$${fmt(costVal)}`,    color: 'bg-purple-50 text-purple-600' },
           { icon: TrendingUp, label: 'Retail Value',             value: `$${fmt(retailVal)}`,  color: 'bg-emerald-50 text-emerald-600' },
-          { icon: BarChart2,  label: `Gross Margin ${marginPct.toFixed(0)}%`, value: `$${fmt(margin)}`, color: margin > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600' },
+          { icon: BarChart2,  label: `Margin ${marginPct.toFixed(0)}%`, value: `$${fmt(margin)}`, color: margin > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600' },
         ].map(({ icon: Icon, label, value, color }) => (
-          <div key={label} className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${color}`}>
-              <Icon size={15} />
+          <div key={label} className="bg-white rounded-xl border border-gray-100 p-3 sm:p-4 shadow-sm">
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center mb-2 ${color}`}>
+              <Icon size={14} />
             </div>
-            <p className="text-lg font-black text-brand-dark leading-tight">{value}</p>
+            <p className="text-base sm:text-lg font-black text-brand-dark leading-tight">{value}</p>
             <p className="text-gray-400 text-xs mt-0.5">{label}</p>
           </div>
         ))}
       </div>
 
       {/* Unit availability summary */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <button
           type="button"
           onClick={() => setFilter(filter === 'single' ? 'all' : 'single')}
           className={clsx(
-            'rounded-xl border p-3 text-left transition-all',
+            'rounded-xl border p-2.5 sm:p-3 text-left transition-all',
             filter === 'single' ? 'bg-blue-50 border-blue-300' : 'bg-white border-gray-100 hover:border-blue-200'
           )}
         >
-          <p className="text-xl font-black text-blue-600">{singleCount}</p>
+          <p className="text-lg sm:text-xl font-black text-blue-600">{singleCount}</p>
           <p className="text-xs font-semibold text-gray-500 mt-0.5">Singles</p>
-          <p className="text-[10px] text-gray-400">exactly 1 unit</p>
+          <p className="text-[10px] text-gray-400 hidden sm:block">exactly 1 unit</p>
         </button>
         <button
           type="button"
           onClick={() => setFilter(filter === 'pair' ? 'all' : 'pair')}
           className={clsx(
-            'rounded-xl border p-3 text-left transition-all',
+            'rounded-xl border p-2.5 sm:p-3 text-left transition-all',
             filter === 'pair' ? 'bg-purple-50 border-purple-300' : 'bg-white border-gray-100 hover:border-purple-200'
           )}
         >
-          <p className="text-xl font-black text-purple-600">{pairCount}</p>
-          <p className="text-xs font-semibold text-gray-500 mt-0.5">Have Pairs</p>
-          <p className="text-[10px] text-gray-400">2+ units available</p>
+          <p className="text-lg sm:text-xl font-black text-purple-600">{pairCount}</p>
+          <p className="text-xs font-semibold text-gray-500 mt-0.5">Pairs</p>
+          <p className="text-[10px] text-gray-400 hidden sm:block">2+ units available</p>
         </button>
         <button
           type="button"
           onClick={() => setFilter(filter === 'set' ? 'all' : 'set')}
           className={clsx(
-            'rounded-xl border p-3 text-left transition-all',
+            'rounded-xl border p-2.5 sm:p-3 text-left transition-all',
             filter === 'set' ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-gray-100 hover:border-emerald-200'
           )}
         >
-          <p className="text-xl font-black text-emerald-600">{setCount}</p>
+          <p className="text-lg sm:text-xl font-black text-emerald-600">{setCount}</p>
           <p className="text-xs font-semibold text-gray-500 mt-0.5">Full Sets</p>
-          <p className="text-[10px] text-gray-400">4+ units available</p>
+          <p className="text-[10px] text-gray-400 hidden sm:block">4+ units available</p>
         </button>
       </div>
 
       {/* Filter tabs */}
       <div className="flex items-center gap-2 flex-wrap">
         {([
-          { key: 'all',      label: 'All',         count: tires.length },
-          { key: 'in-stock', label: 'In Stock',     count: tires.filter((t) => t.quantity > 4).length },
-          { key: 'low',      label: 'Low Stock',    count: lowCount },
-          { key: 'out',      label: 'Out of Stock', count: outCount },
+          { key: 'all',      label: 'All',      count: tires.length },
+          { key: 'in-stock', label: 'In Stock',  count: tires.filter((t) => t.quantity > 4).length },
+          { key: 'low',      label: 'Low',       count: lowCount },
+          { key: 'out',      label: 'Out',       count: outCount },
         ] as { key: StockFilter; label: string; count: number }[]).map(({ key, label, count }) => (
           <button
             key={key}
             type="button"
             onClick={() => setFilter(key)}
             className={clsx(
-              'px-4 py-1.5 rounded-full text-sm font-semibold transition-all border',
+              'px-3 sm:px-4 py-1.5 rounded-full text-sm font-semibold transition-all border',
               filter === key
                 ? 'bg-brand-dark text-white border-brand-dark'
                 : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
@@ -384,8 +378,129 @@ export default function InventoryPage() {
         ))}
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      {/* ── MOBILE CARD LIST (hidden on sm+) ─────────────────────────────── */}
+      <div className="sm:hidden space-y-3">
+        {loading ? (
+          <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-400 text-sm">
+            Loading inventory...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+            <p className="text-gray-400 font-medium text-sm">
+              {search ? `No results for "${search}"` : 'No tires yet.'}
+            </p>
+            {!search && (
+              <button type="button" onClick={openAdd} className="mt-3 text-brand-red text-sm font-semibold hover:underline">
+                + Add your first tire
+              </button>
+            )}
+          </div>
+        ) : (
+          filtered.map((t) => {
+            const status      = stockStatus(t.quantity)
+            const StatusIcon  = status.icon
+            const badge       = unitBadge(t.quantity)
+            const tireMargin  = parseFloat(t.price) - parseFloat(t.cost)
+            const tirePct     = parseFloat(t.price) > 0 ? (tireMargin / parseFloat(t.price)) * 100 : 0
+            const marginColor = tirePct >= 20 ? 'text-emerald-600' : tirePct >= 10 ? 'text-yellow-600' : 'text-red-500'
+
+            return (
+              <div
+                key={t.id}
+                className={clsx(
+                  'bg-white rounded-2xl border border-gray-100 p-4 shadow-sm',
+                  t.quantity === 0 && 'bg-red-50/40 border-red-100'
+                )}
+              >
+                {/* Top row: brand/model + actions */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-bold text-brand-dark leading-tight truncate">{t.brand}</p>
+                    <p className="text-gray-400 text-xs truncate">{t.model}</p>
+                    <p className="font-mono text-xs text-gray-500 mt-0.5">{t.width}/{t.aspect}R{t.diameter}</p>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => openEdit(t)}
+                      className="p-2 hover:bg-blue-50 rounded-xl text-gray-400 hover:text-blue-600 transition-colors"
+                      aria-label="Edit"
+                    >
+                      <Pencil size={15} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteTire(t.id, `${t.brand} ${t.model}`)}
+                      className="p-2 hover:bg-red-50 rounded-xl text-gray-400 hover:text-brand-red transition-colors"
+                      aria-label="Delete"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Status + location */}
+                <div className="flex items-center gap-2 mt-3 flex-wrap">
+                  <span className={clsx('inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold', status.color)}>
+                    <StatusIcon size={11} />
+                    {status.label}
+                  </span>
+                  {t.location && (
+                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                      <MapPin size={11} className="text-brand-red flex-shrink-0" />
+                      {t.location}
+                    </span>
+                  )}
+                </div>
+
+                {/* Bottom row: qty controls + price/margin */}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                  {/* Qty adjust */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      aria-label="Decrease quantity"
+                      disabled={adjusting === t.id || t.quantity === 0}
+                      onClick={() => adjustQty(t, -1)}
+                      className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 transition-colors"
+                    >
+                      <Minus size={13} />
+                    </button>
+                    <span className="w-8 text-center font-bold text-brand-dark text-base tabular-nums">
+                      {adjusting === t.id ? '…' : t.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="Increase quantity"
+                      disabled={adjusting === t.id}
+                      onClick={() => adjustQty(t, 1)}
+                      className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 transition-colors"
+                    >
+                      <Plus size={13} />
+                    </button>
+                    {badge && (
+                      <span className={clsx('px-2 py-0.5 rounded text-[10px] font-bold', badge.color)}>
+                        {badge.label}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Price + margin */}
+                  <div className="text-right">
+                    <p className="font-bold text-brand-dark text-base">${parseFloat(t.price).toFixed(2)}</p>
+                    <p className={clsx('text-xs font-semibold', marginColor)}>
+                      +${tireMargin.toFixed(2)} <span className="text-gray-400 font-normal">({tirePct.toFixed(0)}%)</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+
+      {/* ── DESKTOP TABLE (hidden on mobile) ─────────────────────────────── */}
+      <div className="hidden sm:block bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
@@ -425,18 +540,15 @@ export default function InventoryPage() {
                   return (
                     <tr key={t.id} className={clsx('transition-colors', t.quantity === 0 ? 'bg-red-50/30' : 'hover:bg-gray-50/60')}>
 
-                      {/* Brand / Model */}
                       <td className="px-4 py-3">
                         <p className="font-semibold text-brand-dark leading-tight">{t.brand}</p>
                         <p className="text-gray-400 text-xs">{t.model}</p>
                       </td>
 
-                      {/* Size */}
                       <td className="px-4 py-3 font-mono text-xs text-gray-600 whitespace-nowrap">
                         {t.width}/{t.aspect}R{t.diameter}
                       </td>
 
-                      {/* Status badge */}
                       <td className="px-4 py-3">
                         <span className={clsx('inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap', status.color)}>
                           <StatusIcon size={11} />
@@ -444,7 +556,6 @@ export default function InventoryPage() {
                         </span>
                       </td>
 
-                      {/* Units — qty + quick adjust + unit badge */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
                           <button
@@ -476,7 +587,6 @@ export default function InventoryPage() {
                         )}
                       </td>
 
-                      {/* Location */}
                       <td className="px-4 py-3">
                         {t.location ? (
                           <span className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
@@ -488,17 +598,14 @@ export default function InventoryPage() {
                         )}
                       </td>
 
-                      {/* Cost */}
                       <td className="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">
                         ${parseFloat(t.cost).toFixed(2)}
                       </td>
 
-                      {/* Price */}
                       <td className="px-4 py-3 font-semibold text-brand-dark text-xs whitespace-nowrap">
                         ${parseFloat(t.price).toFixed(2)}
                       </td>
 
-                      {/* Margin */}
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className={clsx('text-xs font-bold', marginColor)}>
                           +${tireMargin.toFixed(2)}
@@ -506,7 +613,6 @@ export default function InventoryPage() {
                         <span className="text-gray-400 text-xs"> ({tirePct.toFixed(0)}%)</span>
                       </td>
 
-                      {/* Actions */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
                           <button
@@ -539,20 +645,20 @@ export default function InventoryPage() {
       {/* Add / Edit Modal */}
       {modalOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center sm:p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setModalOpen(false) }}
         >
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white z-10">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg shadow-2xl max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100 sticky top-0 bg-white z-10">
               <h2 className="font-bold text-lg text-brand-dark">{editing ? 'Edit Tire' : 'Add Tire'}</h2>
               <button type="button" onClick={() => setModalOpen(false)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400">
                 <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6 space-y-4">
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="admin-label">Brand *</label>
                   <input {...register('brand')} className="admin-input" placeholder="Michelin" />
@@ -570,30 +676,27 @@ export default function InventoryPage() {
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <input {...register('width')} type="number" className="admin-input" placeholder="225" />
-                    <p className="text-gray-400 text-[10px] mt-1 text-center">Width (mm)</p>
+                    <p className="text-gray-400 text-[10px] mt-1 text-center">Width</p>
                     {errors.width && <p className="text-red-500 text-xs">{errors.width.message}</p>}
                   </div>
                   <div>
                     <input {...register('aspect')} type="number" className="admin-input" placeholder="65" />
-                    <p className="text-gray-400 text-[10px] mt-1 text-center">Aspect (%)</p>
+                    <p className="text-gray-400 text-[10px] mt-1 text-center">Aspect</p>
                   </div>
                   <div>
                     <input {...register('diameter')} type="number" className="admin-input" placeholder="17" />
-                    <p className="text-gray-400 text-[10px] mt-1 text-center">Diameter (in)</p>
+                    <p className="text-gray-400 text-[10px] mt-1 text-center">Diameter</p>
                   </div>
                 </div>
               </div>
 
-              {/* Quantity — quick pick + manual */}
               <div>
                 <label className="admin-label">How Many? *</label>
-
-                {/* Quick-pick buttons */}
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   {[
-                    { qty: 1, label: 'Single',    sub: '1 tire',    color: 'border-blue-300 hover:border-blue-500',    activeColor: 'bg-blue-500 border-blue-500 text-white' },
-                    { qty: 2, label: 'Pair',       sub: '2 tires',   color: 'border-purple-300 hover:border-purple-500', activeColor: 'bg-purple-500 border-purple-500 text-white' },
-                    { qty: 4, label: 'Full Set',   sub: '4 tires',   color: 'border-emerald-300 hover:border-emerald-500', activeColor: 'bg-emerald-500 border-emerald-500 text-white' },
+                    { qty: 1, label: 'Single',  sub: '1 tire',  color: 'border-blue-300 hover:border-blue-500',    activeColor: 'bg-blue-500 border-blue-500 text-white' },
+                    { qty: 2, label: 'Pair',    sub: '2 tires', color: 'border-purple-300 hover:border-purple-500', activeColor: 'bg-purple-500 border-purple-500 text-white' },
+                    { qty: 4, label: 'Full Set',sub: '4 tires', color: 'border-emerald-300 hover:border-emerald-500', activeColor: 'bg-emerald-500 border-emerald-500 text-white' },
                   ].map(({ qty, label, sub, color, activeColor }) => {
                     const isActive = Number(watchedQty) === qty
                     return (
@@ -602,37 +705,32 @@ export default function InventoryPage() {
                         type="button"
                         onClick={() => setValue('quantity', qty, { shouldValidate: true })}
                         className={clsx(
-                          'flex flex-col items-center py-3 rounded-xl border-2 transition-all text-center',
+                          'flex flex-col items-center py-2.5 sm:py-3 rounded-xl border-2 transition-all text-center',
                           isActive ? activeColor : `bg-white border-gray-200 ${color} text-gray-700`
                         )}
                       >
                         <span className="text-xl font-black leading-none">{qty}</span>
                         <span className="text-xs font-bold mt-0.5">{label}</span>
-                        <span className={clsx('text-[10px]', isActive ? 'opacity-80' : 'text-gray-400')}>{sub}</span>
+                        <span className={clsx('text-[10px] hidden sm:block', isActive ? 'opacity-80' : 'text-gray-400')}>{sub}</span>
                       </button>
                     )
                   })}
                 </div>
-
-                {/* Manual quantity input */}
-                <div className="flex items-center gap-2">
-                  <input
-                    {...register('quantity')}
-                    type="number"
-                    className="admin-input"
-                    placeholder="Or type a custom amount"
-                  />
-                </div>
+                <input
+                  {...register('quantity')}
+                  type="number"
+                  className="admin-input"
+                  placeholder="Or type a custom amount"
+                />
                 {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity.message}</p>}
               </div>
 
               <div>
                 <label className="admin-label">Location</label>
                 <input {...register('location')} className="admin-input" placeholder="Bay 1 · Shelf A" />
-                <p className="text-gray-400 text-[10px] mt-1">Where it&apos;s stored</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="admin-label">Cost ($) *</label>
                   <input {...register('cost')} type="number" step="0.01" className="admin-input" placeholder="85.00" />
@@ -650,18 +748,18 @@ export default function InventoryPage() {
                 <input {...register('notes')} className="admin-input" placeholder="Any additional info..." />
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3 pt-2 pb-safe">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex-1 bg-brand-dark text-white rounded-xl py-2.5 text-sm font-bold hover:bg-black transition-colors disabled:opacity-60"
+                  className="flex-1 bg-brand-dark text-white rounded-xl py-3 text-sm font-bold hover:bg-black transition-colors disabled:opacity-60"
                 >
                   {saving ? 'Saving...' : editing ? 'Update Tire' : 'Add Tire'}
                 </button>
