@@ -18,6 +18,11 @@ function toStr(v: unknown): string {
   return String(v).trim()
 }
 
+function toNullableStr(v: unknown): string | null {
+  const s = toStr(v)
+  return s.length > 0 ? s : null
+}
+
 function toNum(v: unknown): number | undefined {
   const s = toStr(v).replace(/[$,\s]/g, '')
   if (!s) return undefined
@@ -55,15 +60,15 @@ function applyMapping(
 async function importTireRow(raw: Record<string, unknown>) {
   const brand    = toStr(raw.brand)
   const model    = toStr(raw.model)
-  const sku      = toStr(raw.sku) || null
+  const sku      = toNullableStr(raw.sku)
   const width    = toInt(raw.width)
   const aspect   = toInt(raw.aspect)
   const diameter = toInt(raw.diameter)
   const quantity = toInt(raw.quantity) ?? 0
   const cost     = toNum(raw.cost)
   const price    = toNum(raw.price)
-  const location = toStr(raw.location) || null
-  const notes    = toStr(raw.notes) || null
+  const location = toNullableStr(raw.location)
+  const notes    = toNullableStr(raw.notes)
 
   if (!brand || !model) throw new Error('Brand and model are required')
   if (cost === undefined || cost <= 0) throw new Error('Valid cost is required')

@@ -2,21 +2,40 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 
 const schema = z.object({
-  scannedValue: z.string().min(1).max(200),
+  scannedValue: z.string().max(200).transform((value) => value.trim()).refine(Boolean, 'Required'),
   scanType: z.enum(['RECEIVE', 'REMOVE', 'AUDIT']),
   qty: z.coerce.number().int().positive().default(1),
 })
 
-// Parse "225/65R17", "225 65 17", "22565r17" etc. with sanity checks
+const tireInclude = {
+  container: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+} satisfies Prisma.TireInclude
+
+// Parse "225/65R17", "225 65 17", "22565R17", or "2256517".
 function parseTireSize(s: string): { width: number; aspect: number; diameter: number } | null {
-  const clean = s.replace(/[rR]/g, ' ').replace(/[/,]/g, ' ').trim()
-  const parts = clean.split(/\s+/).map(Number).filter((n) => !isNaN(n) && n > 0)
+  const compact = s.trim().match(/^(\d{3})(\d{2})[rR]?(\d{2})$/)
+  const parts = compact
+    ? compact.slice(1).map(Number)
+    : s
+        .replace(/[rR]/g, ' ')
+        .replace(/[/,]/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .map(Number)
+        .filter((n) => !isNaN(n) && n > 0)
+
   if (parts.length !== 3) return null
   const [width, aspect, diameter] = parts
-  // Sanity ranges for real tire sizes
+
   if (width < 100 || width > 400) return null
   if (aspect < 20 || aspect > 100) return null
   if (diameter < 10 || diameter > 30) return null
@@ -30,108 +49,219 @@ export async function POST(req: NextRequest) {
   try {
     const body = schema.parse(await req.json())
     const { scannedValue, scanType, qty } = body
+    const userEmail = session.user?.email ?? undefined
 
-    // 1. Try exact SKU match
-    let tire = await prisma.tire.findUnique({ where: { sku: scannedValue } })
+    const outcome = await prisma.$transaction(async (tx) => {
+      let tire = await tx.tire.findUnique({
+        where: { sku: scannedValue },
+        include: tireInclude,
+      })
 
-    // 2. Try to parse as tire size (fallback)
-    let ambiguous = false
-    if (!tire) {
-      const size = parseTireSize(scannedValue)
-      if (size) {
-        const matches = await prisma.tire.findMany({ where: size })
-        if (matches.length === 1) {
-          tire = matches[0]
-        } else if (matches.length > 1) {
-          ambiguous = true
+      let ambiguous = false
+      if (!tire) {
+        const size = parseTireSize(scannedValue)
+        if (size) {
+          const matches = await tx.tire.findMany({
+            where: size,
+            include: tireInclude,
+          })
+          if (matches.length === 1) {
+            tire = matches[0]
+          } else if (matches.length > 1) {
+            ambiguous = true
+          }
         }
       }
-    }
 
-    // Not found — log and return error
-    if (!tire) {
-      await prisma.scanLog.create({
+      if (!tire) {
+        const errorMessage = ambiguous
+          ? `Multiple tires match "${scannedValue}" - scan a specific SKU`
+          : `No tire found for "${scannedValue}"`
+
+        await tx.scanLog.create({
+          data: {
+            scannedValue,
+            scanType,
+            userEmail,
+            success: false,
+            errorMessage,
+          },
+        })
+
+        return {
+          status: 404,
+          body: {
+            success: false,
+            error: ambiguous
+              ? 'Multiple tires match that size - assign SKUs to distinguish them'
+              : 'Unknown barcode - no tire found in inventory',
+          },
+        }
+      }
+
+      const qtyBefore = tire.quantity
+
+      if (scanType === 'AUDIT') {
+        await tx.scanLog.create({
+          data: {
+            tireId: tire.id,
+            scannedValue,
+            scanType,
+            userEmail,
+            qtyBefore,
+            qtyAfter: qtyBefore,
+            success: true,
+          },
+        })
+
+        return {
+          status: 200,
+          body: {
+            success: true,
+            tire,
+            qtyBefore,
+            qtyAfter: qtyBefore,
+            delta: 0,
+          },
+        }
+      }
+
+      if (scanType === 'RECEIVE') {
+        const updatedTire = await tx.tire.update({
+          where: { id: tire.id },
+          data: { quantity: { increment: qty } },
+          include: tireInclude,
+        })
+        const qtyAfter = updatedTire.quantity
+
+        await tx.scanLog.create({
+          data: {
+            tireId: tire.id,
+            scannedValue,
+            scanType,
+            userEmail,
+            qtyBefore,
+            qtyAfter,
+            success: true,
+          },
+        })
+
+        return {
+          status: 200,
+          body: {
+            success: true,
+            tire: updatedTire,
+            qtyBefore,
+            qtyAfter,
+            delta: qtyAfter - qtyBefore,
+          },
+        }
+      }
+
+      if (qtyBefore < qty) {
+        const error = qtyBefore === 0
+          ? 'Tire is already out of stock'
+          : 'Not enough stock to remove requested quantity'
+
+        await tx.scanLog.create({
+          data: {
+            tireId: tire.id,
+            scannedValue,
+            scanType,
+            userEmail,
+            qtyBefore,
+            qtyAfter: qtyBefore,
+            success: false,
+            errorMessage: `Requested ${qty}, only ${qtyBefore} available`,
+          },
+        })
+
+        return {
+          status: 409,
+          body: {
+            success: false,
+            error,
+            currentQuantity: qtyBefore,
+            requestedQuantity: qty,
+            tire,
+          },
+        }
+      }
+
+      const update = await tx.tire.updateMany({
+        where: {
+          id: tire.id,
+          quantity: { gte: qty },
+        },
         data: {
-          scannedValue,
-          scanType,
-          userEmail: session.user?.email ?? undefined,
-          success: false,
-          errorMessage: ambiguous
-            ? `Multiple tires match "${scannedValue}" — scan a specific SKU`
-            : `No tire found for "${scannedValue}"`,
+          quantity: { decrement: qty },
         },
       })
-      return NextResponse.json(
-        {
-          success: false,
-          error: ambiguous
-            ? 'Multiple tires match that size — assign SKUs to distinguish them'
-            : 'Unknown barcode — no tire found in inventory',
-        },
-        { status: 404 }
-      )
-    }
 
-    const qtyBefore = tire.quantity
-    let qtyAfter = qtyBefore
+      if (update.count !== 1) {
+        const currentTire = await tx.tire.findUniqueOrThrow({
+          where: { id: tire.id },
+          include: tireInclude,
+        })
 
-    // REMOVE: block if already at 0
-    if (scanType === 'REMOVE' && qtyBefore === 0) {
-      await prisma.scanLog.create({
+        await tx.scanLog.create({
+          data: {
+            tireId: tire.id,
+            scannedValue,
+            scanType,
+            userEmail,
+            qtyBefore: currentTire.quantity,
+            qtyAfter: currentTire.quantity,
+            success: false,
+            errorMessage: `Requested ${qty}, only ${currentTire.quantity} available`,
+          },
+        })
+
+        return {
+          status: 409,
+          body: {
+            success: false,
+            error: currentTire.quantity === 0
+              ? 'Tire is already out of stock'
+              : 'Not enough stock to remove requested quantity',
+            currentQuantity: currentTire.quantity,
+            requestedQuantity: qty,
+            tire: currentTire,
+          },
+        }
+      }
+
+      const updatedTire = await tx.tire.findUniqueOrThrow({
+        where: { id: tire.id },
+        include: tireInclude,
+      })
+      const qtyAfter = updatedTire.quantity
+
+      await tx.scanLog.create({
         data: {
           tireId: tire.id,
           scannedValue,
           scanType,
-          userEmail: session.user?.email ?? undefined,
-          qtyBefore: 0,
-          qtyAfter: 0,
-          success: false,
-          errorMessage: 'Tire is out of stock — cannot remove',
+          userEmail,
+          qtyBefore,
+          qtyAfter,
+          success: true,
         },
       })
-      return NextResponse.json(
-        { success: false, error: 'Tire is already out of stock', tire },
-        { status: 409 }
-      )
-    }
 
-    if (scanType === 'RECEIVE') {
-      qtyAfter = qtyBefore + qty
-    } else if (scanType === 'REMOVE') {
-      qtyAfter = Math.max(0, qtyBefore - qty)
-    }
-    // AUDIT: qtyAfter stays the same as qtyBefore
-
-    // Update tire quantity (not for AUDIT)
-    if (scanType !== 'AUDIT') {
-      await prisma.tire.update({
-        where: { id: tire.id },
-        data: { quantity: qtyAfter },
-      })
-    }
-
-    // Log the scan
-    await prisma.scanLog.create({
-      data: {
-        tireId: tire.id,
-        scannedValue,
-        scanType,
-        userEmail: session.user?.email ?? undefined,
-        qtyBefore,
-        qtyAfter,
-        success: true,
-      },
+      return {
+        status: 200,
+        body: {
+          success: true,
+          tire: updatedTire,
+          qtyBefore,
+          qtyAfter,
+          delta: qtyAfter - qtyBefore,
+        },
+      }
     })
 
-    const updatedTire = { ...tire, quantity: qtyAfter }
-
-    return NextResponse.json({
-      success: true,
-      tire: updatedTire,
-      qtyBefore,
-      qtyAfter,
-      delta: qtyAfter - qtyBefore,
-    })
+    return NextResponse.json(outcome.body, { status: outcome.status })
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: err.issues }, { status: 400 })

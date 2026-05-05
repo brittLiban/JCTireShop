@@ -29,6 +29,8 @@ interface ScanResult {
   qtyAfter?: number
   delta?: number
   error?: string
+  currentQuantity?: number
+  requestedQuantity?: number
   scannedValue: string
   scanType: ScanType
   qty: number
@@ -130,6 +132,8 @@ export default function ScanPage() {
           qtyAfter:     data.qtyAfter,
           delta:        data.delta,
           error:        data.error,
+          currentQuantity: data.currentQuantity,
+          requestedQuantity: data.requestedQuantity,
           scannedValue: trimmed,
           scanType,
           qty:          activeQty,
@@ -492,6 +496,11 @@ export default function ScanPage() {
                 <>
                   <p className="font-bold text-red-700">Scan Failed</p>
                   <p className="text-red-600 text-sm mt-0.5">{lastResult.error}</p>
+                  {lastResult.currentQuantity !== undefined && lastResult.requestedQuantity !== undefined && (
+                    <p className="text-red-500 text-xs mt-1 font-semibold">
+                      Available: {lastResult.currentQuantity} / Requested: {lastResult.requestedQuantity}
+                    </p>
+                  )}
                   <p className="text-red-400 text-xs mt-1 font-mono break-all">
                     Scanned: {lastResult.scannedValue}
                   </p>

@@ -2,10 +2,28 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 
+const nullableText = (max: number) =>
+  z.union([z.string().max(max), z.null(), z.undefined()]).transform((value) => {
+    if (value === undefined) return undefined
+    if (value === null) return null
+    const trimmed = value.trim()
+    return trimmed.length > 0 ? trimmed : null
+  })
+
+const tireInclude = {
+  container: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+} satisfies Prisma.TireInclude
+
 const schema = z.object({
-  sku:         z.string().max(100).optional().nullable(),
+  sku:         nullableText(100),
   brand:       z.string().min(1).max(100),
   model:       z.string().min(1).max(100),
   width:       z.coerce.number().int().positive(),
@@ -14,9 +32,9 @@ const schema = z.object({
   quantity:    z.coerce.number().int().min(0),
   cost:        z.coerce.number().positive(),
   price:       z.coerce.number().positive(),
-  location:    z.string().max(100).optional().nullable(),
-  notes:       z.string().max(500).optional().nullable(),
-  containerId: z.string().optional().nullable(),
+  location:    nullableText(100),
+  notes:       nullableText(500),
+  containerId: nullableText(100),
 })
 
 async function requireAuth() {
@@ -24,11 +42,39 @@ async function requireAuth() {
   return session
 }
 
+function prismaErrorResponse(err: unknown) {
+  if (!(err instanceof Prisma.PrismaClientKnownRequestError)) return null
+
+  if (err.code === 'P2002') {
+    const target = Array.isArray(err.meta?.target)
+      ? err.meta.target.map(String).join(', ')
+      : String(err.meta?.target ?? '')
+    const field = target.toLowerCase().includes('sku') ? 'SKU / barcode' : 'Unique field'
+
+    return NextResponse.json(
+      { error: `${field} already exists. Use a unique value.` },
+      { status: 409 }
+    )
+  }
+
+  if (err.code === 'P2003') {
+    return NextResponse.json(
+      { error: 'Selected container was not found.' },
+      { status: 400 }
+    )
+  }
+
+  return null
+}
+
 export async function GET() {
   if (!(await requireAuth())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  const tires = await prisma.tire.findMany({ orderBy: [{ brand: 'asc' }, { model: 'asc' }] })
+  const tires = await prisma.tire.findMany({
+    include: tireInclude,
+    orderBy: [{ brand: 'asc' }, { model: 'asc' }],
+  })
   return NextResponse.json(tires)
 }
 
@@ -38,12 +84,17 @@ export async function POST(req: NextRequest) {
   }
   try {
     const body = schema.parse(await req.json())
-    const tire = await prisma.tire.create({ data: body })
+    const tire = await prisma.tire.create({
+      data: body,
+      include: tireInclude,
+    })
     return NextResponse.json(tire, { status: 201 })
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: err.issues }, { status: 400 })
     }
+    const mappedError = prismaErrorResponse(err)
+    if (mappedError) return mappedError
     console.error(err)
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }

@@ -12,8 +12,14 @@ import {
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
 
+interface Container {
+  id: string
+  name: string
+}
+
 interface Tire {
   id: string
+  sku?: string | null
   brand: string
   model: string
   width: number
@@ -22,11 +28,14 @@ interface Tire {
   quantity: number
   cost: string
   price: string
+  containerId?: string | null
+  container?: Container | null
   location?: string | null
   notes?: string | null
 }
 
 const schema = z.object({
+  sku:      z.string().max(100).optional(),
   brand:    z.string().min(1, 'Required').max(100),
   model:    z.string().min(1, 'Required').max(100),
   width:    z.coerce.number({ invalid_type_error: 'Required' }).int().positive(),
@@ -35,6 +44,7 @@ const schema = z.object({
   quantity: z.coerce.number({ invalid_type_error: 'Required' }).int().min(0),
   cost:     z.coerce.number({ invalid_type_error: 'Required' }).positive(),
   price:    z.coerce.number({ invalid_type_error: 'Required' }).positive(),
+  containerId: z.string().optional(),
   location: z.string().max(100).optional(),
   notes:    z.string().max(500).optional(),
 })
@@ -67,6 +77,7 @@ function unitBadge(qty: number): { label: string; color: string } | null {
 
 export default function InventoryPage() {
   const [tires,     setTires]     = useState<Tire[]>([])
+  const [containers, setContainers] = useState<Container[]>([])
   const [loading,   setLoading]   = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editing,   setEditing]   = useState<Tire | null>(null)
@@ -94,7 +105,20 @@ export default function InventoryPage() {
     }
   }, [])
 
-  useEffect(() => { fetchTires() }, [fetchTires])
+  const fetchContainers = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/containers')
+      if (!res.ok) throw new Error()
+      setContainers(await res.json())
+    } catch {
+      toast.error('Failed to load containers')
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchTires()
+    fetchContainers()
+  }, [fetchTires, fetchContainers])
 
   const filtered = tires.filter((t) => {
     if (filter === 'in-stock' && t.quantity <= 4) return false
@@ -117,8 +141,10 @@ export default function InventoryPage() {
 
     const q = search.toLowerCase()
     return (
+      (t.sku ?? '').toLowerCase().includes(q)      ||
       t.brand.toLowerCase().includes(q)    ||
       t.model.toLowerCase().includes(q)    ||
+      (t.container?.name ?? '').toLowerCase().includes(q) ||
       (t.location ?? '').toLowerCase().includes(q)
     )
   })
@@ -143,17 +169,19 @@ export default function InventoryPage() {
 
   const openAdd = () => {
     setEditing(null)
-    reset({ quantity: 0 })
+    reset({ sku: '', quantity: 0, containerId: '', location: '', notes: '' })
     setModalOpen(true)
   }
 
   const openEdit = (t: Tire) => {
     setEditing(t)
     reset({
+      sku: t.sku ?? '',
       brand: t.brand, model: t.model,
       width: t.width, aspect: t.aspect, diameter: t.diameter,
       quantity: t.quantity,
       cost: parseFloat(t.cost), price: parseFloat(t.price),
+      containerId: t.containerId ?? '',
       location: t.location ?? '',
       notes: t.notes ?? '',
     })
@@ -165,17 +193,31 @@ export default function InventoryPage() {
     try {
       const url    = editing ? `/api/admin/tires/${editing.id}` : '/api/admin/tires'
       const method = editing ? 'PUT' : 'POST'
+      const payload = {
+        ...data,
+        sku: data.sku?.trim() || null,
+        containerId: data.containerId || null,
+        location: data.location?.trim() || null,
+        notes: data.notes?.trim() || null,
+      }
       const res    = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       })
-      if (!res.ok) throw new Error()
+      if (!res.ok) {
+        let message = 'Failed to save. Please try again.'
+        try {
+          const body = await res.json()
+          if (typeof body.error === 'string') message = body.error
+        } catch {}
+        throw new Error(message)
+      }
       toast.success(editing ? 'Tire updated!' : 'Tire added!')
       setModalOpen(false)
       fetchTires()
-    } catch {
-      toast.error('Failed to save. Please try again.')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -201,6 +243,7 @@ export default function InventoryPage() {
   const marginPct  = retailVal > 0 ? (margin / retailVal) * 100 : 0
   const lowCount   = tires.filter((t) => t.quantity > 0 && t.quantity <= 4).length
   const outCount   = tires.filter((t) => t.quantity === 0).length
+  const missingSkuCount = tires.filter((t) => !t.sku?.trim()).length
   const singleCount = tires.filter((t) => t.quantity === 1).length
   const pairCount   = tires.filter((t) => t.quantity >= 2).length
   const setCount    = tires.filter((t) => t.quantity >= 4).length
@@ -213,9 +256,10 @@ export default function InventoryPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-brand-dark">Inventory</h1>
           <p className="text-gray-500 text-xs sm:text-sm mt-1">
-            {tires.length} SKU{tires.length !== 1 ? 's' : ''} · {totalUnits} total units
+            {tires.length} tire{tires.length !== 1 ? 's' : ''} · {totalUnits} total units
             {outCount > 0 && <span className="ml-2 text-red-500 font-semibold">· {outCount} out</span>}
             {lowCount > 0 && <span className="ml-2 text-yellow-600 font-semibold">· {lowCount} low</span>}
+            {missingSkuCount > 0 && <span className="ml-2 text-red-500 font-semibold">· {missingSkuCount} SKU missing</span>}
           </p>
         </div>
         <button type="button" onClick={openAdd} className="btn-primary flex-shrink-0">
@@ -230,7 +274,7 @@ export default function InventoryPage() {
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
           <input
             type="text"
-            placeholder='Brand, model, or size like "225/65R17"'
+            placeholder='SKU, brand, model, container, or size like "225/65R17"'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-brand-gray border border-white/10 rounded-xl pl-10 pr-10 py-3 text-white placeholder-gray-600 text-sm focus:outline-none focus:ring-2 focus:ring-brand-yellow"
@@ -403,6 +447,7 @@ export default function InventoryPage() {
             const tireMargin  = parseFloat(t.price) - parseFloat(t.cost)
             const tirePct     = parseFloat(t.price) > 0 ? (tireMargin / parseFloat(t.price)) * 100 : 0
             const marginColor = tirePct >= 20 ? 'text-emerald-600' : tirePct >= 10 ? 'text-yellow-600' : 'text-red-500'
+            const skuLabel    = t.sku?.trim()
 
             return (
               <div
@@ -418,6 +463,9 @@ export default function InventoryPage() {
                     <p className="font-bold text-brand-dark leading-tight truncate">{t.brand}</p>
                     <p className="text-gray-400 text-xs truncate">{t.model}</p>
                     <p className="font-mono text-xs text-gray-500 mt-0.5">{t.width}/{t.aspect}R{t.diameter}</p>
+                    <p className={clsx('font-mono text-[11px] mt-1 truncate', skuLabel ? 'text-gray-500' : 'text-red-500 font-semibold')}>
+                      {skuLabel ? `SKU ${skuLabel}` : 'SKU missing'}
+                    </p>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
@@ -445,6 +493,12 @@ export default function InventoryPage() {
                     <StatusIcon size={11} />
                     {status.label}
                   </span>
+                  {t.container?.name && (
+                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                      <Package size={11} className="text-blue-500 flex-shrink-0" />
+                      {t.container.name}
+                    </span>
+                  )}
                   {t.location && (
                     <span className="flex items-center gap-1 text-xs text-gray-500">
                       <MapPin size={11} className="text-brand-red flex-shrink-0" />
@@ -505,7 +559,7 @@ export default function InventoryPage() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                {['Brand / Model', 'Size', 'Status', 'Units', 'Location', 'Cost', 'Price', 'Margin', ''].map((h) => (
+                {['Brand / Model', 'SKU / Barcode', 'Size', 'Status', 'Units', 'Storage', 'Cost', 'Price', 'Margin', ''].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
                     {h}
                   </th>
@@ -514,10 +568,10 @@ export default function InventoryPage() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
-                <tr><td colSpan={9} className="px-4 py-12 text-center text-gray-400">Loading inventory...</td></tr>
+                <tr><td colSpan={10} className="px-4 py-12 text-center text-gray-400">Loading inventory...</td></tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center">
+                  <td colSpan={10} className="px-4 py-12 text-center">
                     <p className="text-gray-400 font-medium">
                       {search ? `No results for "${search}"` : 'No tires yet.'}
                     </p>
@@ -536,6 +590,7 @@ export default function InventoryPage() {
                   const tireMargin = parseFloat(t.price) - parseFloat(t.cost)
                   const tirePct    = parseFloat(t.price) > 0 ? (tireMargin / parseFloat(t.price)) * 100 : 0
                   const marginColor = tirePct >= 20 ? 'text-emerald-600' : tirePct >= 10 ? 'text-yellow-600' : 'text-red-500'
+                  const skuLabel = t.sku?.trim()
 
                   return (
                     <tr key={t.id} className={clsx('transition-colors', t.quantity === 0 ? 'bg-red-50/30' : 'hover:bg-gray-50/60')}>
@@ -543,6 +598,14 @@ export default function InventoryPage() {
                       <td className="px-4 py-3">
                         <p className="font-semibold text-brand-dark leading-tight">{t.brand}</p>
                         <p className="text-gray-400 text-xs">{t.model}</p>
+                      </td>
+
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {skuLabel ? (
+                          <span className="font-mono text-xs text-gray-600">{skuLabel}</span>
+                        ) : (
+                          <span className="text-red-500 text-xs font-semibold">SKU missing</span>
+                        )}
                       </td>
 
                       <td className="px-4 py-3 font-mono text-xs text-gray-600 whitespace-nowrap">
@@ -588,11 +651,21 @@ export default function InventoryPage() {
                       </td>
 
                       <td className="px-4 py-3">
-                        {t.location ? (
-                          <span className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
-                            <MapPin size={11} className="text-brand-red flex-shrink-0" />
-                            {t.location}
-                          </span>
+                        {t.container?.name || t.location ? (
+                          <div className="space-y-1">
+                            {t.container?.name && (
+                              <span className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
+                                <Package size={11} className="text-blue-500 flex-shrink-0" />
+                                {t.container.name}
+                              </span>
+                            )}
+                            {t.location && (
+                              <span className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
+                                <MapPin size={11} className="text-brand-red flex-shrink-0" />
+                                {t.location}
+                              </span>
+                            )}
+                          </div>
                         ) : (
                           <span className="text-gray-300 text-xs">—</span>
                         )}
@@ -672,6 +745,12 @@ export default function InventoryPage() {
               </div>
 
               <div>
+                <label className="admin-label">SKU / Barcode</label>
+                <input {...register('sku')} className="admin-input font-mono" placeholder="Scan or type barcode" />
+                {errors.sku && <p className="text-red-500 text-xs mt-1">{errors.sku.message}</p>}
+              </div>
+
+              <div>
                 <label className="admin-label">Tire Size *</label>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
@@ -725,9 +804,22 @@ export default function InventoryPage() {
                 {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity.message}</p>}
               </div>
 
-              <div>
-                <label className="admin-label">Location</label>
-                <input {...register('location')} className="admin-input" placeholder="Bay 1 · Shelf A" />
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label className="admin-label">Container</label>
+                  <select {...register('containerId')} className="admin-input">
+                    <option value="">No container</option>
+                    {containers.map((container) => (
+                      <option key={container.id} value={container.id}>
+                        {container.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="admin-label">Location</label>
+                  <input {...register('location')} className="admin-input" placeholder="Bay 1 · Shelf A" />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
