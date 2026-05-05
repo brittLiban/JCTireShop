@@ -90,8 +90,9 @@ export default function ScanPage() {
   useEffect(() => {
     return () => {
       scanningRef.current = false
-      if (videoRef.current) videoRef.current.srcObject = null
       controlsRef.current?.stop()
+      controlsRef.current = null
+      if (videoRef.current) videoRef.current.srcObject = null
     }
   }, [])
 
@@ -154,38 +155,6 @@ export default function ScanPage() {
     processRef.current = processScannedValue
   }, [processScannedValue])
 
-  // Camera scan loop (runs while cameraMode is true)
-  useEffect(() => {
-    if (!cameraMode) return
-
-    scanningRef.current = true
-    let running = true
-
-    const loop = async () => {
-      if (!running) return
-
-      if (!videoRef.current || !detectorRef.current) {
-        setTimeout(loop, 300)
-        return
-      }
-
-      if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
-        try {
-          const results = await detectorRef.current.detect(videoRef.current)
-          if (results.length > 0 && !cooldownRef.current && processRef.current) {
-            await processRef.current(results[0].rawValue)
-          }
-        } catch {
-          // BarcodeDetector can throw on frames without a code.
-        }
-      }
-      if (running) setTimeout(loop, 300)
-    }
-
-    loop()
-    return () => { running = false; scanningRef.current = false }
-  }, [cameraMode])
-
   const startCamera = async () => {
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
@@ -193,10 +162,24 @@ export default function ScanPage() {
         return
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
-      })
-      streamRef.current = stream
+      const hints = new Map()
+      hints.set(DecodeHintType.POSSIBLE_FORMATS, CAMERA_BARCODE_FORMATS)
+      hints.set(DecodeHintType.TRY_HARDER, true)
+
+      const reader = new BrowserMultiFormatReader(hints)
+      readerRef.current = reader
+
+      const controls = await reader.decodeFromConstraintsToVideoElement(
+        { video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } },
+        videoRef.current!,
+        (result) => {
+          if (result && !cooldownRef.current && processRef.current) {
+            processRef.current(result.getText())
+          }
+        },
+      )
+
+      controlsRef.current = controls
       setCameraMode(true)
     } catch {
       toast.error('Could not access camera — check browser permissions')
@@ -204,9 +187,9 @@ export default function ScanPage() {
   }
 
   const stopCamera = () => {
+    controlsRef.current?.stop()
+    controlsRef.current = null
     if (videoRef.current) videoRef.current.srcObject = null
-    streamRef.current?.getTracks().forEach((t) => t.stop())
-    streamRef.current = null
     setCameraMode(false)
   }
 
@@ -318,25 +301,23 @@ export default function ScanPage() {
       {/* Scanner Area */}
       <div className="bg-brand-dark rounded-2xl p-5 space-y-4">
 
-        {/* Camera viewfinder */}
-        {cameraMode && (
-          <div className="relative rounded-xl overflow-hidden bg-black" style={{ aspectRatio: '16/9' }}>
-            <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
-            {/* Targeting reticle */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-52 h-36 border-2 border-brand-yellow rounded-xl opacity-80" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4">
-                <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-yellow" />
-                <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-yellow" />
-                <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-yellow" />
-                <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-yellow" />
-              </div>
+        {/* Camera viewfinder — always mounted so videoRef is available when startCamera runs */}
+        <div className={clsx('relative rounded-xl overflow-hidden bg-black', !cameraMode && 'hidden')} style={{ aspectRatio: '16/9' }}>
+          <video ref={videoRef} className="w-full h-full object-cover" playsInline muted autoPlay />
+          {/* Targeting reticle */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-52 h-36 border-2 border-brand-yellow rounded-xl opacity-80" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4">
+              <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-yellow" />
+              <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-yellow" />
+              <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-yellow" />
+              <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-yellow" />
             </div>
-            <p className="absolute bottom-2 left-0 right-0 text-center text-white/60 text-xs">
-              Hold barcode steady in the frame
-            </p>
           </div>
-        )}
+          <p className="absolute bottom-2 left-0 right-0 text-center text-white/60 text-xs">
+            Hold barcode steady in the frame
+          </p>
+        </div>
 
         {/* Status + camera toggle */}
         <div className="flex items-center justify-between">
