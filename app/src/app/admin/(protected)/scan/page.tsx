@@ -8,8 +8,24 @@ import {
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
 import Link from 'next/link'
+import { BrowserMultiFormatReader, type IScannerControls } from '@zxing/browser'
+import { BarcodeFormat, DecodeHintType } from '@zxing/library'
 
 type ScanType = 'RECEIVE' | 'REMOVE' | 'AUDIT'
+
+const CAMERA_BARCODE_FORMATS = [
+  BarcodeFormat.QR_CODE,
+  BarcodeFormat.CODE_128,
+  BarcodeFormat.CODE_39,
+  BarcodeFormat.CODE_93,
+  BarcodeFormat.EAN_13,
+  BarcodeFormat.EAN_8,
+  BarcodeFormat.UPC_A,
+  BarcodeFormat.UPC_E,
+  BarcodeFormat.ITF,
+  BarcodeFormat.DATA_MATRIX,
+  BarcodeFormat.PDF_417,
+]
 
 interface TireInfo {
   id: string
@@ -37,12 +53,6 @@ interface ScanResult {
   timestamp: Date
 }
 
-// Minimal BarcodeDetector types (not in standard TS lib)
-interface BarcodeDetectorResult {
-  rawValue: string
-  format: string
-}
-
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function ScanPage() {
@@ -52,47 +62,23 @@ export default function ScanPage() {
   const [inputValue,  setInputValue]  = useState('')
   const [scanning,    setScanning]    = useState(false)
   const [cameraMode,  setCameraMode]  = useState(false)
-  const [cameraOk,    setCameraOk]    = useState(false)   // BarcodeDetector available
+  const [cameraOk,    setCameraOk]    = useState(false)
   const [lastResult,  setLastResult]  = useState<ScanResult | null>(null)
   const [recentScans, setRecentScans] = useState<ScanResult[]>([])
   const [cooldown,    setCooldown]    = useState(false)
 
   const inputRef      = useRef<HTMLInputElement>(null)
   const videoRef      = useRef<HTMLVideoElement>(null)
-  const streamRef     = useRef<MediaStream | null>(null)
-  const detectorRef   = useRef<{ detect: (v: HTMLVideoElement) => Promise<BarcodeDetectorResult[]> } | null>(null)
+  const readerRef     = useRef<BrowserMultiFormatReader | null>(null)
+  const controlsRef   = useRef<IScannerControls | null>(null)
   const scanningRef   = useRef(false)
+  const processingRef = useRef(false)
   const cooldownRef   = useRef(false)
   const processRef    = useRef<(value: string) => Promise<void>>()
 
-  // Check BarcodeDetector availability on client
+  // Camera scanning uses ZXing, so availability only depends on camera access.
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    if (!('BarcodeDetector' in window)) return
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const BD = (window as any).BarcodeDetector
-
-    let cancelled = false
-
-    const initDetector = async () => {
-      try {
-        const fmts = await BD.getSupportedFormats()
-        if (cancelled) return
-        detectorRef.current = new BD({ formats: fmts })
-        setCameraOk(true)
-      } catch {
-        if (cancelled) return
-        detectorRef.current = new BD({
-          formats: ['qr_code', 'code_128', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_39', 'code_93'],
-        })
-        setCameraOk(true)
-      }
-    }
-
-    initDetector()
-
-    return () => { cancelled = true }
+    setCameraOk(typeof navigator !== 'undefined' && Boolean(navigator.mediaDevices?.getUserMedia))
   }, [])
 
   // Focus input when camera closes
@@ -105,7 +91,7 @@ export default function ScanPage() {
     return () => {
       scanningRef.current = false
       if (videoRef.current) videoRef.current.srcObject = null
-      streamRef.current?.getTracks().forEach((t) => t.stop())
+      controlsRef.current?.stop()
     }
   }, [])
 
@@ -114,8 +100,9 @@ export default function ScanPage() {
   const processScannedValue = useCallback(
     async (value: string) => {
       const trimmed = value.trim()
-      if (!trimmed || scanning || cooldownRef.current) return
+      if (!trimmed || scanning || processingRef.current || cooldownRef.current) return
 
+      processingRef.current = true
       setScanning(true)
       try {
         const res  = await fetch('/api/admin/scan', {
@@ -155,6 +142,7 @@ export default function ScanPage() {
       } catch {
         toast.error('Network error — check connection')
       } finally {
+        processingRef.current = false
         setScanning(false)
       }
     },
@@ -165,25 +153,6 @@ export default function ScanPage() {
   useEffect(() => {
     processRef.current = processScannedValue
   }, [processScannedValue])
-
-  // Attach the camera stream after the video element has rendered.
-  useEffect(() => {
-    if (!cameraMode || !videoRef.current || !streamRef.current) return
-
-    const video = videoRef.current
-    video.srcObject = streamRef.current
-    video.play().catch(() => {
-      toast.error('Camera opened, but video playback failed')
-      video.srcObject = null
-      streamRef.current?.getTracks().forEach((t) => t.stop())
-      streamRef.current = null
-      setCameraMode(false)
-    })
-
-    return () => {
-      video.srcObject = null
-    }
-  }, [cameraMode])
 
   // Camera scan loop (runs while cameraMode is true)
   useEffect(() => {
@@ -207,7 +176,7 @@ export default function ScanPage() {
             await processRef.current(results[0].rawValue)
           }
         } catch {
-          // BarcodeDetector throws on some frames — ignore
+          // BarcodeDetector can throw on frames without a code.
         }
       }
       if (running) setTimeout(loop, 300)
