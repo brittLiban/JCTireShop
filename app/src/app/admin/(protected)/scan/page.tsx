@@ -68,19 +68,29 @@ export default function ScanPage() {
     if (typeof window === 'undefined') return
     if (!('BarcodeDetector' in window)) return
 
-    setCameraOk(true)
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const BD = (window as any).BarcodeDetector
-    BD.getSupportedFormats()
-      .then((fmts: string[]) => {
+
+    let cancelled = false
+
+    const initDetector = async () => {
+      try {
+        const fmts = await BD.getSupportedFormats()
+        if (cancelled) return
         detectorRef.current = new BD({ formats: fmts })
-      })
-      .catch(() => {
+        setCameraOk(true)
+      } catch {
+        if (cancelled) return
         detectorRef.current = new BD({
           formats: ['qr_code', 'code_128', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_39', 'code_93'],
         })
-      })
+        setCameraOk(true)
+      }
+    }
+
+    initDetector()
+
+    return () => { cancelled = true }
   }, [])
 
   // Focus input when camera closes
@@ -92,6 +102,7 @@ export default function ScanPage() {
   useEffect(() => {
     return () => {
       scanningRef.current = false
+      if (videoRef.current) videoRef.current.srcObject = null
       streamRef.current?.getTracks().forEach((t) => t.stop())
     }
   }, [])
@@ -151,6 +162,25 @@ export default function ScanPage() {
     processRef.current = processScannedValue
   }, [processScannedValue])
 
+  // Attach the camera stream after the video element has rendered.
+  useEffect(() => {
+    if (!cameraMode || !videoRef.current || !streamRef.current) return
+
+    const video = videoRef.current
+    video.srcObject = streamRef.current
+    video.play().catch(() => {
+      toast.error('Camera opened, but video playback failed')
+      video.srcObject = null
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+      streamRef.current = null
+      setCameraMode(false)
+    })
+
+    return () => {
+      video.srcObject = null
+    }
+  }, [cameraMode])
+
   // Camera scan loop (runs while cameraMode is true)
   useEffect(() => {
     if (!cameraMode) return
@@ -159,7 +189,13 @@ export default function ScanPage() {
     let running = true
 
     const loop = async () => {
-      if (!running || !videoRef.current || !detectorRef.current) return
+      if (!running) return
+
+      if (!videoRef.current || !detectorRef.current) {
+        setTimeout(loop, 300)
+        return
+      }
+
       if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
         try {
           const results = await detectorRef.current.detect(videoRef.current)
@@ -179,14 +215,15 @@ export default function ScanPage() {
 
   const startCamera = async () => {
     try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        toast.error('Camera access requires HTTPS and a supported mobile browser')
+        return
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
       })
       streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        await videoRef.current.play()
-      }
       setCameraMode(true)
     } catch {
       toast.error('Could not access camera — check browser permissions')
@@ -194,6 +231,7 @@ export default function ScanPage() {
   }
 
   const stopCamera = () => {
+    if (videoRef.current) videoRef.current.srcObject = null
     streamRef.current?.getTracks().forEach((t) => t.stop())
     streamRef.current = null
     setCameraMode(false)
