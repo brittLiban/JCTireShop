@@ -84,6 +84,23 @@ export async function POST(req: NextRequest) {
   }
   try {
     const body = schema.parse(await req.json())
+
+    const duplicate = await prisma.tire.findFirst({
+      where: {
+        brand:    { equals: body.brand,    mode: 'insensitive' },
+        model:    { equals: body.model,    mode: 'insensitive' },
+        width:    body.width,
+        aspect:   body.aspect,
+        diameter: body.diameter,
+      },
+    })
+    if (duplicate) {
+      return NextResponse.json(
+        { error: `${body.brand} ${body.model} ${body.width}/${body.aspect}R${body.diameter} already exists in inventory.` },
+        { status: 409 }
+      )
+    }
+
     const tire = await prisma.tire.create({
       data: body,
       include: tireInclude,

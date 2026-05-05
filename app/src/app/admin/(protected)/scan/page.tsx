@@ -1,9 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import {
-  Camera, CameraOff, Scan, RotateCcw,
-  CheckCircle2, XCircle, Loader2, ClipboardList, Minus, Plus,
+  Camera, CameraOff, Scan, RotateCcw, X,
+  CheckCircle2, XCircle, Loader2, ClipboardList, Minus, Plus, Package,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
@@ -26,6 +29,8 @@ const CAMERA_BARCODE_FORMATS = [
   BarcodeFormat.DATA_MATRIX,
   BarcodeFormat.PDF_417,
 ]
+
+interface Container { id: string; name: string }
 
 interface TireInfo {
   id: string
@@ -53,6 +58,18 @@ interface ScanResult {
   timestamp: Date
 }
 
+const addSchema = z.object({
+  brand:       z.string().min(1, 'Required').max(100),
+  model:       z.string().min(1, 'Required').max(100),
+  width:       z.coerce.number({ invalid_type_error: 'Required' }).int().positive('Required'),
+  aspect:      z.coerce.number({ invalid_type_error: 'Required' }).int().positive('Required'),
+  diameter:    z.coerce.number({ invalid_type_error: 'Required' }).int().positive('Required'),
+  cost:        z.coerce.number({ invalid_type_error: 'Required' }).positive('Required'),
+  price:       z.coerce.number({ invalid_type_error: 'Required' }).positive('Required'),
+  containerId: z.string().optional(),
+})
+type AddFormData = z.infer<typeof addSchema>
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function ScanPage() {
@@ -66,6 +83,10 @@ export default function ScanPage() {
   const [lastResult,  setLastResult]  = useState<ScanResult | null>(null)
   const [recentScans, setRecentScans] = useState<ScanResult[]>([])
   const [cooldown,    setCooldown]    = useState(false)
+  const [containers,  setContainers]  = useState<Container[]>([])
+  const [addModalOpen, setAddModalOpen] = useState(false)
+  const [pendingBarcode, setPendingBarcode] = useState('')
+  const [creating,    setCreating]    = useState(false)
 
   const inputRef      = useRef<HTMLInputElement>(null)
   const videoRef      = useRef<HTMLVideoElement>(null)
@@ -76,17 +97,17 @@ export default function ScanPage() {
   const cooldownRef   = useRef(false)
   const processRef    = useRef<(value: string) => Promise<void>>()
 
-  // Camera scanning uses ZXing, so availability only depends on camera access.
+  const addForm = useForm<AddFormData>({ resolver: zodResolver(addSchema) })
+  const { formState: { errors: addErrors } } = addForm
+
   useEffect(() => {
     setCameraOk(typeof navigator !== 'undefined' && Boolean(navigator.mediaDevices?.getUserMedia))
   }, [])
 
-  // Focus input when camera closes
   useEffect(() => {
     if (!cameraMode) inputRef.current?.focus()
   }, [cameraMode])
 
-  // Cleanup camera on unmount
   useEffect(() => {
     return () => {
       scanningRef.current = false
@@ -94,6 +115,13 @@ export default function ScanPage() {
       controlsRef.current = null
       if (videoRef.current) videoRef.current.srcObject = null
     }
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/admin/containers')
+      .then((r) => r.json())
+      .then(setContainers)
+      .catch(() => {})
   }, [])
 
   const activeQty = customQty ? parseInt(customQty) || 1 : qty
@@ -113,26 +141,34 @@ export default function ScanPage() {
         })
         const data = await res.json()
 
+        // Unknown barcode → open quick-add modal instead of showing a failure
+        if (res.status === 404 && !data.tire) {
+          setPendingBarcode(trimmed)
+          addForm.reset({ brand: '', model: '', containerId: '' })
+          setAddModalOpen(true)
+          setInputValue('')
+          return
+        }
+
         const result: ScanResult = {
-          success:      data.success,
-          tire:         data.tire,
-          qtyBefore:    data.qtyBefore,
-          qtyAfter:     data.qtyAfter,
-          delta:        data.delta,
-          error:        data.error,
-          currentQuantity: data.currentQuantity,
+          success:           data.success,
+          tire:              data.tire,
+          qtyBefore:         data.qtyBefore,
+          qtyAfter:          data.qtyAfter,
+          delta:             data.delta,
+          error:             data.error,
+          currentQuantity:   data.currentQuantity,
           requestedQuantity: data.requestedQuantity,
-          scannedValue: trimmed,
+          scannedValue:      trimmed,
           scanType,
-          qty:          activeQty,
-          timestamp:    new Date(),
+          qty:               activeQty,
+          timestamp:         new Date(),
         }
 
         setLastResult(result)
         setRecentScans((prev) => [result, ...prev].slice(0, 20))
         setInputValue('')
 
-        // 1.5 s cooldown to prevent duplicate scans from fast scanners
         setCooldown(true)
         cooldownRef.current = true
         setTimeout(() => {
@@ -147,13 +183,69 @@ export default function ScanPage() {
         setScanning(false)
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [scanType, activeQty, scanning]
   )
 
-  // Keep ref in sync so camera loop always uses latest version
   useEffect(() => {
     processRef.current = processScannedValue
   }, [processScannedValue])
+
+  const handleAddSubmit = addForm.handleSubmit(async (data: AddFormData) => {
+    setCreating(true)
+    try {
+      // Create the tire with qty 0 — the RECEIVE scan below adds the stock
+      const createRes = await fetch('/api/admin/tires', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          sku:         pendingBarcode || null,
+          quantity:    0,
+          containerId: data.containerId || null,
+        }),
+      })
+
+      if (!createRes.ok) {
+        const body = await createRes.json().catch(() => ({}))
+        toast.error(typeof body.error === 'string' ? body.error : 'Failed to add tire')
+        return
+      }
+
+      setAddModalOpen(false)
+
+      // Process the original scan as RECEIVE with the current qty setting
+      const scanRes  = await fetch('/api/admin/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scannedValue: pendingBarcode, scanType: 'RECEIVE', qty: activeQty }),
+      })
+      const scanData = await scanRes.json()
+
+      const result: ScanResult = {
+        success:      scanData.success,
+        tire:         scanData.tire,
+        qtyBefore:    scanData.qtyBefore,
+        qtyAfter:     scanData.qtyAfter,
+        delta:        scanData.delta,
+        error:        scanData.error,
+        scannedValue: pendingBarcode,
+        scanType:     'RECEIVE',
+        qty:          activeQty,
+        timestamp:    new Date(),
+      }
+      setLastResult(result)
+      setRecentScans((prev) => [result, ...prev].slice(0, 20))
+
+      if (scanData.success) {
+        toast.success(`${data.brand} ${data.model} added & received!`)
+      }
+    } catch {
+      toast.error('Network error — check connection')
+    } finally {
+      setCreating(false)
+    }
+  })
 
   const startCamera = async () => {
     try {
@@ -304,7 +396,6 @@ export default function ScanPage() {
         {/* Camera viewfinder — always mounted so videoRef is available when startCamera runs */}
         <div className={clsx('relative rounded-xl overflow-hidden bg-black', !cameraMode && 'hidden')} style={{ aspectRatio: '16/9' }}>
           <video ref={videoRef} className="w-full h-full object-cover" playsInline muted autoPlay />
-          {/* Targeting reticle */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="w-52 h-36 border-2 border-brand-yellow rounded-xl opacity-80" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4">
@@ -355,7 +446,7 @@ export default function ScanPage() {
           )}
         </div>
 
-        {/* Text input (always visible — works for USB/BT scanners) */}
+        {/* Text input */}
         <div className="relative">
           <Scan size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
           <input
@@ -517,6 +608,129 @@ export default function ScanPage() {
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Quick-Add New Tire Modal ─────────────────────────────────────────── */}
+      {addModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center sm:p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setAddModalOpen(false) }}
+        >
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg shadow-2xl max-h-[92vh] overflow-y-auto">
+
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 sticky top-0 bg-white z-10">
+              <div>
+                <h2 className="font-bold text-lg text-brand-dark">New Tire</h2>
+                <p className="text-xs text-gray-400 mt-0.5">Barcode not found — fill in the details to add it</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAddModalOpen(false)}
+                className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddSubmit} className="p-4 space-y-4">
+
+              {/* Scanned barcode display */}
+              <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-2.5">
+                <Scan size={14} className="text-gray-400 flex-shrink-0" />
+                <div>
+                  <p className="text-[11px] text-gray-400">Scanned barcode — saved as SKU</p>
+                  <p className="font-mono text-sm font-bold text-brand-dark">{pendingBarcode}</p>
+                </div>
+              </div>
+
+              {/* Brand + Model */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="admin-label">Brand *</label>
+                  <input {...addForm.register('brand')} className="admin-input" placeholder="Michelin" autoFocus />
+                  {addErrors.brand && <p className="text-red-500 text-xs mt-1">{addErrors.brand.message}</p>}
+                </div>
+                <div>
+                  <label className="admin-label">Model *</label>
+                  <input {...addForm.register('model')} className="admin-input" placeholder="Defender2" />
+                  {addErrors.model && <p className="text-red-500 text-xs mt-1">{addErrors.model.message}</p>}
+                </div>
+              </div>
+
+              {/* Tire Size */}
+              <div>
+                <label className="admin-label">Tire Size *</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <input {...addForm.register('width')} type="number" className="admin-input text-center" placeholder="225" />
+                    <p className="text-gray-400 text-[10px] mt-1 text-center">Width</p>
+                    {addErrors.width && <p className="text-red-500 text-xs">{addErrors.width.message}</p>}
+                  </div>
+                  <div>
+                    <input {...addForm.register('aspect')} type="number" className="admin-input text-center" placeholder="65" />
+                    <p className="text-gray-400 text-[10px] mt-1 text-center">Aspect</p>
+                    {addErrors.aspect && <p className="text-red-500 text-xs">{addErrors.aspect.message}</p>}
+                  </div>
+                  <div>
+                    <input {...addForm.register('diameter')} type="number" className="admin-input text-center" placeholder="17" />
+                    <p className="text-gray-400 text-[10px] mt-1 text-center">Diameter</p>
+                    {addErrors.diameter && <p className="text-red-500 text-xs">{addErrors.diameter.message}</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Container */}
+              <div>
+                <label className="admin-label">
+                  <Package size={12} className="inline mr-1 text-blue-500" />
+                  Container (Location)
+                </label>
+                <select {...addForm.register('containerId')} className="admin-input">
+                  <option value="">No container</option>
+                  {containers.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Cost + Price */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="admin-label">Cost ($) *</label>
+                  <input {...addForm.register('cost')} type="number" step="0.01" className="admin-input" placeholder="85.00" />
+                  {addErrors.cost && <p className="text-red-500 text-xs mt-1">{addErrors.cost.message}</p>}
+                </div>
+                <div>
+                  <label className="admin-label">Sell Price ($) *</label>
+                  <input {...addForm.register('price')} type="number" step="0.01" className="admin-input" placeholder="129.00" />
+                  {addErrors.price && <p className="text-red-500 text-xs mt-1">{addErrors.price.message}</p>}
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                <CheckCircle2 size={12} className="text-emerald-500 flex-shrink-0" />
+                Will be received as {activeQty} unit{activeQty !== 1 ? 's' : ''} and logged automatically
+              </p>
+
+              <div className="flex gap-3 pt-1 pb-safe">
+                <button
+                  type="button"
+                  onClick={() => setAddModalOpen(false)}
+                  className="flex-1 px-4 py-3 border border-gray-200 text-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="flex-1 bg-brand-dark text-white rounded-xl py-3 text-sm font-bold hover:bg-black disabled:opacity-60 transition-colors"
+                >
+                  {creating ? 'Adding...' : 'Add & Receive'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
