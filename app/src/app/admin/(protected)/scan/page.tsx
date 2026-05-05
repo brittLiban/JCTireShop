@@ -169,7 +169,7 @@ export default function ScanPage() {
       const reader = new BrowserMultiFormatReader(hints)
       readerRef.current = reader
 
-      const controls = await reader.decodeFromConstraintsToVideoElement(
+      const controls = await reader.decodeFromConstraints(
         { video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } },
         videoRef.current!,
         (result) => {
