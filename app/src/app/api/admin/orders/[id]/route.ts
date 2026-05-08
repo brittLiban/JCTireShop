@@ -8,7 +8,16 @@ const schema = z.object({
   supplier: z.string().min(1).max(100).optional(),
   orderNumber: z.string().max(100).optional(),
   items: z
-    .array(z.object({ name: z.string(), qty: z.number(), unitCost: z.number() }))
+    .array(z.object({
+      brand:    z.string().default(''),
+      model:    z.string().default(''),
+      width:    z.number().int().min(0).default(0),
+      aspect:   z.number().int().min(0).default(0),
+      diameter: z.number().int().min(0).default(0),
+      qty:      z.number().positive(),
+      unitCost: z.number().positive(),
+      name:     z.string().optional(),
+    }))
     .optional(),
   totalCost: z.coerce.number().positive().optional(),
   status: z

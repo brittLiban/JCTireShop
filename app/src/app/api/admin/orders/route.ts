@@ -5,9 +5,14 @@ import { prisma } from '@/lib/db'
 import { z } from 'zod'
 
 const itemSchema = z.object({
-  name: z.string().min(1),
-  qty: z.number().positive(),
+  brand:    z.string().default(''),
+  model:    z.string().default(''),
+  width:    z.number().int().min(0).default(0),
+  aspect:   z.number().int().min(0).default(0),
+  diameter: z.number().int().min(0).default(0),
+  qty:      z.number().positive(),
   unitCost: z.number().positive(),
+  name:     z.string().optional(), // legacy compat
 })
 
 const schema = z.object({
