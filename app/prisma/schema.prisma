@@ -130,3 +130,55 @@ enum ImportStatus {
   COMPLETED
   FAILED
 }
+
+model Employee {
+  id         String         @id @default(cuid())
+  name       String
+  role       String?
+  phone      String?
+  email      String?
+  payType    PayType        @default(HOURLY)
+  payRate    Decimal        @db.Decimal(10, 2)
+  startDate  DateTime?
+  status     EmployeeStatus @default(ACTIVE)
+  notes      String?
+  payRecords PayRecord[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([status])
+}
+
+model PayRecord {
+  id          String        @id @default(cuid())
+  employeeId  String
+  employee    Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  type        PayRecordType @default(PAYROLL)
+  amount      Decimal       @db.Decimal(10, 2)
+  hours       Decimal?      @db.Decimal(8, 2)
+  periodStart DateTime?
+  periodEnd   DateTime?
+  notes       String?
+  paidAt      DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+
+  @@index([employeeId])
+  @@index([paidAt])
+}
+
+enum PayType {
+  HOURLY
+  SALARY
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PayRecordType {
+  PAYROLL
+  BONUS
+  EXPENSE
+  DEDUCTION
+}
