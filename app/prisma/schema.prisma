@@ -41,7 +41,6 @@ model Tire {
   quantity    Int        @default(0)
   cost        Decimal    @db.Decimal(10, 2)
   price       Decimal    @db.Decimal(10, 2)
-  location    String?
   notes       String?
   containerId String?
   container   Container? @relation(fields: [containerId], references: [id], onDelete: SetNull)

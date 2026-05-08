@@ -1,0 +1,1 @@
+ALTER TABLE "Tire" DROP COLUMN IF EXISTS "location";

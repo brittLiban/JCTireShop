@@ -7,7 +7,7 @@ import { z } from 'zod'
 import {
   Plus, X, Pencil, Trash2, AlertTriangle,
   DollarSign, TrendingUp, BarChart2, Package,
-  Search, MapPin, CheckCircle2, XCircle, Minus,
+  Search, CheckCircle2, XCircle, Minus,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
@@ -30,7 +30,6 @@ interface Tire {
   price: string
   containerId?: string | null
   container?: Container | null
-  location?: string | null
   notes?: string | null
 }
 
@@ -45,7 +44,6 @@ const schema = z.object({
   cost:     z.coerce.number({ invalid_type_error: 'Required' }).positive(),
   price:    z.coerce.number({ invalid_type_error: 'Required' }).positive(),
   containerId: z.string().optional(),
-  location: z.string().max(100).optional(),
   notes:    z.string().max(500).optional(),
 })
 
@@ -144,8 +142,7 @@ export default function InventoryPage() {
       (t.sku ?? '').toLowerCase().includes(q)      ||
       t.brand.toLowerCase().includes(q)    ||
       t.model.toLowerCase().includes(q)    ||
-      (t.container?.name ?? '').toLowerCase().includes(q) ||
-      (t.location ?? '').toLowerCase().includes(q)
+      (t.container?.name ?? '').toLowerCase().includes(q)
     )
   })
 
@@ -169,7 +166,7 @@ export default function InventoryPage() {
 
   const openAdd = () => {
     setEditing(null)
-    reset({ sku: '', quantity: 0, containerId: '', location: '', notes: '' })
+    reset({ sku: '', quantity: 0, containerId: '', notes: '' })
     setModalOpen(true)
   }
 
@@ -182,7 +179,6 @@ export default function InventoryPage() {
       quantity: t.quantity,
       cost: parseFloat(t.cost), price: parseFloat(t.price),
       containerId: t.containerId ?? '',
-      location: t.location ?? '',
       notes: t.notes ?? '',
     })
     setModalOpen(true)
@@ -197,7 +193,6 @@ export default function InventoryPage() {
         ...data,
         sku: data.sku?.trim() || null,
         containerId: data.containerId || null,
-        location: data.location?.trim() || null,
         notes: data.notes?.trim() || null,
       }
       const res    = await fetch(url, {
@@ -499,12 +494,6 @@ export default function InventoryPage() {
                       {t.container.name}
                     </span>
                   )}
-                  {t.location && (
-                    <span className="flex items-center gap-1 text-xs text-gray-500">
-                      <MapPin size={11} className="text-brand-red flex-shrink-0" />
-                      {t.location}
-                    </span>
-                  )}
                 </div>
 
                 {/* Bottom row: qty controls + price/margin */}
@@ -651,21 +640,11 @@ export default function InventoryPage() {
                       </td>
 
                       <td className="px-4 py-3">
-                        {t.container?.name || t.location ? (
-                          <div className="space-y-1">
-                            {t.container?.name && (
-                              <span className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
-                                <Package size={11} className="text-blue-500 flex-shrink-0" />
-                                {t.container.name}
-                              </span>
-                            )}
-                            {t.location && (
-                              <span className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
-                                <MapPin size={11} className="text-brand-red flex-shrink-0" />
-                                {t.location}
-                              </span>
-                            )}
-                          </div>
+                        {t.container?.name ? (
+                          <span className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
+                            <Package size={11} className="text-blue-500 flex-shrink-0" />
+                            {t.container.name}
+                          </span>
                         ) : (
                           <span className="text-gray-300 text-xs">—</span>
                         )}
@@ -804,22 +783,16 @@ export default function InventoryPage() {
                 {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity.message}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <div>
-                  <label className="admin-label">Container</label>
-                  <select {...register('containerId')} className="admin-input">
-                    <option value="">No container</option>
-                    {containers.map((container) => (
-                      <option key={container.id} value={container.id}>
-                        {container.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="admin-label">Location</label>
-                  <input {...register('location')} className="admin-input" placeholder="Bay 1 · Shelf A" />
-                </div>
+              <div>
+                <label className="admin-label">Container</label>
+                <select {...register('containerId')} className="admin-input">
+                  <option value="">No container</option>
+                  {containers.map((container) => (
+                    <option key={container.id} value={container.id}>
+                      {container.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
