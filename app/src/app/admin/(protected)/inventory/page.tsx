@@ -64,10 +64,6 @@ function stockStatus(qty: number) {
   return               { label: 'In Stock',      color: 'bg-green-100 text-green-700',   icon: CheckCircle2 }
 }
 
-function stockBreakdown(qty: number) {
-  if (qty === 0) return null
-  return { sets: Math.floor(qty / 4), pairs: Math.floor(qty / 2), singles: qty }
-}
 
 export default function InventoryPage() {
   const [tires,     setTires]     = useState<Tire[]>([])
@@ -457,7 +453,6 @@ export default function InventoryPage() {
             const status      = stockStatus(t.quantity)
             const StatusIcon  = status.icon
             const isUsed      = t.brand.toLowerCase() === 'used'
-            const breakdown   = isUsed ? null : stockBreakdown(t.quantity)
             const tireMargin  = parseFloat(t.price) - parseFloat(t.cost)
             const tirePct     = parseFloat(t.price) > 0 ? (tireMargin / parseFloat(t.price)) * 100 : 0
             const marginColor = tirePct >= 20 ? 'text-emerald-600' : tirePct >= 10 ? 'text-yellow-600' : 'text-red-500'
@@ -518,21 +513,12 @@ export default function InventoryPage() {
                         <p className="text-[10px] text-gray-400 pl-14">{t.quantity} tires total</p>
                       </div>
                     ) : (
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <button type="button" aria-label="Decrease" disabled={adjusting === t.id || t.quantity === 0} onClick={() => adjustQty(t, -1)}
-                            className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 transition-colors"><Minus size={13} /></button>
-                          <span className="w-8 text-center font-bold text-brand-dark text-base tabular-nums">{adjusting === t.id ? '…' : t.quantity}</span>
-                          <button type="button" aria-label="Increase" disabled={adjusting === t.id} onClick={() => adjustQty(t, 1)}
-                            className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 transition-colors"><Plus size={13} /></button>
-                        </div>
-                        {breakdown && (
-                          <div className="flex items-center gap-1 mt-1.5 flex-wrap">
-                            {breakdown.sets > 0 && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">{breakdown.sets} {breakdown.sets === 1 ? 'set' : 'sets'}</span>}
-                            {breakdown.pairs > 0 && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700">{breakdown.pairs} {breakdown.pairs === 1 ? 'pair' : 'pairs'}</span>}
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">{breakdown.singles} {breakdown.singles === 1 ? 'single' : 'singles'}</span>
-                          </div>
-                        )}
+                      <div className="flex items-center gap-2">
+                        <button type="button" aria-label="Decrease" disabled={adjusting === t.id || t.quantity === 0} onClick={() => adjustQty(t, -1)}
+                          className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 transition-colors"><Minus size={13} /></button>
+                        <span className="w-8 text-center font-bold text-brand-dark text-base tabular-nums">{adjusting === t.id ? '…' : t.quantity}</span>
+                        <button type="button" aria-label="Increase" disabled={adjusting === t.id} onClick={() => adjustQty(t, 1)}
+                          className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 transition-colors"><Plus size={13} /></button>
                       </div>
                     )}
                     <div className="text-right flex-shrink-0">
@@ -573,7 +559,6 @@ export default function InventoryPage() {
                   const status      = stockStatus(t.quantity)
                   const StatusIcon  = status.icon
                   const isUsed      = t.brand.toLowerCase() === 'used'
-                  const breakdown   = isUsed ? null : stockBreakdown(t.quantity)
                   const tireMargin  = parseFloat(t.price) - parseFloat(t.cost)
                   const tirePct     = parseFloat(t.price) > 0 ? (tireMargin / parseFloat(t.price)) * 100 : 0
                   const marginColor = tirePct >= 20 ? 'text-emerald-600' : tirePct >= 10 ? 'text-yellow-600' : 'text-red-500'
@@ -619,22 +604,13 @@ export default function InventoryPage() {
                             <p className="text-[9px] text-gray-400 pl-10 pt-0.5">{t.quantity} total</p>
                           </div>
                         ) : (
-                          <>
-                            <div className="flex items-center gap-1.5">
-                              <button type="button" aria-label="Decrease" disabled={adjusting === t.id || t.quantity === 0} onClick={() => adjustQty(t, -1)}
-                                className="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 transition-colors"><Minus size={11} /></button>
-                              <span className="w-7 text-center font-bold text-brand-dark text-sm tabular-nums">{adjusting === t.id ? '…' : t.quantity}</span>
-                              <button type="button" aria-label="Increase" disabled={adjusting === t.id} onClick={() => adjustQty(t, 1)}
-                                className="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 transition-colors"><Plus size={11} /></button>
-                            </div>
-                            {breakdown && (
-                              <div className="flex items-center gap-1 mt-1 flex-wrap">
-                                {breakdown.sets > 0 && <span className="px-1 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">{breakdown.sets} {breakdown.sets === 1 ? 'set' : 'sets'}</span>}
-                                {breakdown.pairs > 0 && <span className="px-1 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700">{breakdown.pairs} {breakdown.pairs === 1 ? 'pair' : 'pairs'}</span>}
-                                <span className="px-1 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">{breakdown.singles} {breakdown.singles === 1 ? 'single' : 'singles'}</span>
-                              </div>
-                            )}
-                          </>
+                          <div className="flex items-center gap-1.5">
+                            <button type="button" aria-label="Decrease" disabled={adjusting === t.id || t.quantity === 0} onClick={() => adjustQty(t, -1)}
+                              className="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 transition-colors"><Minus size={11} /></button>
+                            <span className="w-7 text-center font-bold text-brand-dark text-sm tabular-nums">{adjusting === t.id ? '…' : t.quantity}</span>
+                            <button type="button" aria-label="Increase" disabled={adjusting === t.id} onClick={() => adjustQty(t, 1)}
+                              className="w-6 h-6 rounded-md bg-gray-100 hover:bg-gray-200 flex items-center justify-center disabled:opacity-30 transition-colors"><Plus size={11} /></button>
+                          </div>
                         )}
                       </td>
 
