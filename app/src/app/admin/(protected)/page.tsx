@@ -58,7 +58,7 @@ export default async function AdminDashboard() {
     prisma.contactSubmission.count({ where: { read: false } }),
     prisma.tire.findMany({
       where: { quantity: { lte: 4 } },
-      select: { brand: true, model: true, width: true, aspect: true, diameter: true, quantity: true, location: true },
+      select: { brand: true, model: true, width: true, aspect: true, diameter: true, quantity: true },
     }),
     prisma.contactSubmission.findMany({ take: 5, orderBy: { createdAt: 'desc' } }),
     prisma.supplierOrder.findMany({
@@ -377,7 +377,7 @@ export default async function AdminDashboard() {
                 <div key={i} className="px-6 py-3 flex items-center justify-between">
                   <div>
                     <p className="font-medium text-sm text-brand-dark">{t.brand} {t.model}</p>
-                    <p className="text-gray-400 text-xs font-mono">{t.width}/{t.aspect}R{t.diameter}{t.location ? ` · ${t.location}` : ''}</p>
+                    <p className="text-gray-400 text-xs font-mono">{t.width}/{t.aspect}R{t.diameter}</p>
                   </div>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${t.quantity === 0 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                     {t.quantity === 0 ? 'OUT' : `${t.quantity} left`}
