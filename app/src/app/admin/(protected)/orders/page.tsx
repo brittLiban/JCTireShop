@@ -101,7 +101,7 @@ export default function OrdersPage() {
 
   useEffect(() => { fetchOrders() }, [fetchOrders])
 
-  const knownSuppliers = [...new Set(orders.map((o) => o.supplier))].sort()
+  const knownSuppliers = Array.from(new Set(orders.map((o) => o.supplier))).sort()
 
   const resetForm = () => {
     const first = knownSuppliers[0] ?? ''
