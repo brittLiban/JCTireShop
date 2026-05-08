@@ -29,8 +29,13 @@ const CATEGORIES: { key: string; label: string; color: string }[] = [
   { key: 'OTHER',       label: 'Other',       color: 'bg-slate-100 text-slate-600' },
 ]
 
-function catInfo(key: string) {
-  return CATEGORIES.find((c) => c.key === key) ?? CATEGORIES[CATEGORIES.length - 1]
+const KNOWN_KEYS = new Set(CATEGORIES.map((c) => c.key))
+
+function catInfo(key: string): { key: string; label: string; color: string } {
+  const found = CATEGORIES.find((c) => c.key === key)
+  if (found) return found
+  // Custom category — use Other style but display the actual name
+  return { key, label: key, color: 'bg-slate-100 text-slate-600' }
 }
 
 function ordinal(n: number): string {
@@ -62,13 +67,14 @@ export default function ExpensesPage() {
   const [saving,    setSaving]    = useState(false)
 
   // Form
-  const [name,        setName]        = useState('')
-  const [category,    setCategory]    = useState('OTHER')
-  const [amount,      setAmount]      = useState('')
-  const [isRecurring, setIsRecurring] = useState(false)
-  const [recurDay,    setRecurDay]    = useState('1')
-  const [paidAt,      setPaidAt]      = useState('')
-  const [notes,       setNotes]       = useState('')
+  const [name,           setName]           = useState('')
+  const [category,       setCategory]       = useState('OTHER')
+  const [customCategory, setCustomCategory] = useState('')
+  const [amount,         setAmount]         = useState('')
+  const [isRecurring,    setIsRecurring]    = useState(false)
+  const [recurDay,       setRecurDay]       = useState('1')
+  const [paidAt,         setPaidAt]         = useState('')
+  const [notes,          setNotes]          = useState('')
 
   const fetchExpenses = useCallback(async () => {
     setLoading(true)
@@ -87,7 +93,7 @@ export default function ExpensesPage() {
 
   const openAdd = () => {
     setEditing(null)
-    setName(''); setCategory('OTHER'); setAmount('')
+    setName(''); setCategory('OTHER'); setCustomCategory(''); setAmount('')
     setIsRecurring(false); setRecurDay('1')
     setPaidAt(new Date().toISOString().slice(0, 10))
     setNotes('')
@@ -96,7 +102,12 @@ export default function ExpensesPage() {
 
   const openEdit = (e: GeneralExpense) => {
     setEditing(e)
-    setName(e.name); setCategory(e.category)
+    setName(e.name)
+    if (KNOWN_KEYS.has(e.category)) {
+      setCategory(e.category); setCustomCategory('')
+    } else {
+      setCategory('OTHER'); setCustomCategory(e.category)
+    }
     setAmount(parseFloat(e.amount).toString())
     setIsRecurring(e.isRecurring)
     setRecurDay(e.recurDay ? String(e.recurDay) : '1')
@@ -112,8 +123,12 @@ export default function ExpensesPage() {
       toast.error('Enter a valid day (1–31)'); return
     }
     setSaving(true)
+    const resolvedCategory = category === 'OTHER' && customCategory.trim()
+      ? customCategory.trim()
+      : category
+
     const payload = {
-      name: name.trim(), category, amount: parseFloat(amount),
+      name: name.trim(), category: resolvedCategory, amount: parseFloat(amount),
       isRecurring, recurDay: isRecurring ? parseInt(recurDay) : null,
       paidAt: paidAt || new Date().toISOString(),
       notes: notes.trim() || null,
@@ -311,6 +326,14 @@ export default function ExpensesPage() {
                     </button>
                   ))}
                 </div>
+                {category === 'OTHER' && (
+                  <input
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    className="admin-input mt-2"
+                    placeholder="Custom category name (e.g. Vehicle Maintenance, Software…)"
+                  />
+                )}
               </div>
 
               {/* Amount */}
