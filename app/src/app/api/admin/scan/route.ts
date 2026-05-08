@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 
 const schema = z.object({
@@ -10,15 +9,6 @@ const schema = z.object({
   scanType: z.enum(['RECEIVE', 'REMOVE', 'AUDIT']),
   qty: z.coerce.number().int().positive().default(1),
 })
-
-const tireInclude = {
-  container: {
-    select: {
-      id: true,
-      name: true,
-    },
-  },
-} satisfies Prisma.TireInclude
 
 // Parse "225/65R17", "225 65 17", "22565R17", or "2256517".
 function parseTireSize(s: string): { width: number; aspect: number; diameter: number } | null {
@@ -54,7 +44,6 @@ export async function POST(req: NextRequest) {
     const outcome = await prisma.$transaction(async (tx) => {
       let tire = await tx.tire.findUnique({
         where: { sku: scannedValue },
-        include: tireInclude,
       })
 
       let ambiguous = false
@@ -63,7 +52,6 @@ export async function POST(req: NextRequest) {
         if (size) {
           const matches = await tx.tire.findMany({
             where: size,
-            include: tireInclude,
           })
           if (matches.length === 1) {
             tire = matches[0]
@@ -130,7 +118,6 @@ export async function POST(req: NextRequest) {
         const updatedTire = await tx.tire.update({
           where: { id: tire.id },
           data: { quantity: { increment: qty } },
-          include: tireInclude,
         })
         const qtyAfter = updatedTire.quantity
 
@@ -201,7 +188,6 @@ export async function POST(req: NextRequest) {
       if (update.count !== 1) {
         const currentTire = await tx.tire.findUniqueOrThrow({
           where: { id: tire.id },
-          include: tireInclude,
         })
 
         await tx.scanLog.create({
@@ -233,7 +219,6 @@ export async function POST(req: NextRequest) {
 
       const updatedTire = await tx.tire.findUniqueOrThrow({
         where: { id: tire.id },
-        include: tireInclude,
       })
       const qtyAfter = updatedTire.quantity
 

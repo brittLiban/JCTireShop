@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import {
   LayoutDashboard, Package, Truck, LogOut, ExternalLink,
-  ScanLine, Box, Upload, ClipboardList, Menu, X,
+  ScanLine, Upload, ClipboardList, Menu, X,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
@@ -22,8 +22,7 @@ const navGroups = [
   {
     label: 'Operations',
     items: [
-      { href: '/admin/scan',       label: 'Scan Inventory', icon: ScanLine, exact: false },
-      { href: '/admin/containers', label: 'Containers',     icon: Box,      exact: false },
+      { href: '/admin/scan', label: 'Scan Inventory', icon: ScanLine, exact: false },
     ],
   },
   {

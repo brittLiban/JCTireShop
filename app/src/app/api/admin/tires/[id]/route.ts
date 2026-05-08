@@ -13,27 +13,20 @@ const nullableText = (max: number) =>
     return trimmed.length > 0 ? trimmed : null
   })
 
-const tireInclude = {
-  container: {
-    select: {
-      id: true,
-      name: true,
-    },
-  },
-} satisfies Prisma.TireInclude
-
 const schema = z.object({
-  sku:         nullableText(100),
-  brand:       z.string().min(1).max(100).optional(),
-  model:       z.string().min(1).max(100).optional(),
-  width:       z.coerce.number().int().positive().optional(),
-  aspect:      z.coerce.number().int().positive().optional(),
-  diameter:    z.coerce.number().int().positive().optional(),
+  sku:      nullableText(100),
+  brand:    z.string().min(1).max(100).optional(),
+  model:    z.string().min(1).max(100).optional(),
+  width:    z.coerce.number().int().positive().optional(),
+  aspect:   z.coerce.number().int().positive().optional(),
+  diameter: z.coerce.number().int().positive().optional(),
   quantity:    z.coerce.number().int().min(0).optional(),
+  allocSets:   z.coerce.number().int().min(0).optional().nullable(),
+  allocPairs:  z.coerce.number().int().min(0).optional().nullable(),
+  allocSingles: z.coerce.number().int().min(0).optional().nullable(),
   cost:        z.coerce.number().positive().optional(),
   price:       z.coerce.number().positive().optional(),
   notes:       nullableText(500),
-  containerId: nullableText(100),
 })
 
 async function requireAuth() {
@@ -81,7 +74,6 @@ export async function PUT(
     const tire = await prisma.tire.update({
       where: { id: params.id },
       data: body,
-      include: tireInclude,
     })
     return NextResponse.json(tire)
   } catch (err) {

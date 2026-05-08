@@ -27,7 +27,6 @@ model Container {
   capacity  Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  tires     Tire[]
 }
 
 model Tire {
@@ -39,11 +38,12 @@ model Tire {
   aspect      Int
   diameter    Int
   quantity    Int        @default(0)
+  allocSets   Int?
+  allocPairs  Int?
+  allocSingles Int?
   cost        Decimal    @db.Decimal(10, 2)
   price       Decimal    @db.Decimal(10, 2)
   notes       String?
-  containerId String?
-  container   Container? @relation(fields: [containerId], references: [id], onDelete: SetNull)
   scanLogs    ScanLog[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt

@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
   Camera, CameraOff, Scan, RotateCcw, X,
-  CheckCircle2, XCircle, Loader2, ClipboardList, Minus, Plus, Package,
+  CheckCircle2, XCircle, Loader2, ClipboardList, Minus, Plus,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { clsx } from 'clsx'
@@ -29,8 +29,6 @@ const CAMERA_BARCODE_FORMATS = [
   BarcodeFormat.DATA_MATRIX,
   BarcodeFormat.PDF_417,
 ]
-
-interface Container { id: string; name: string }
 
 interface TireInfo {
   id: string
@@ -59,14 +57,13 @@ interface ScanResult {
 }
 
 const addSchema = z.object({
-  brand:       z.string().min(1, 'Required').max(100),
-  model:       z.string().min(1, 'Required').max(100),
-  width:       z.coerce.number({ invalid_type_error: 'Required' }).int().positive('Required'),
-  aspect:      z.coerce.number({ invalid_type_error: 'Required' }).int().positive('Required'),
-  diameter:    z.coerce.number({ invalid_type_error: 'Required' }).int().positive('Required'),
-  cost:        z.coerce.number({ invalid_type_error: 'Required' }).positive('Required'),
-  price:       z.coerce.number({ invalid_type_error: 'Required' }).positive('Required'),
-  containerId: z.string().optional(),
+  brand:    z.string().min(1, 'Required').max(100),
+  model:    z.string().min(1, 'Required').max(100),
+  width:    z.coerce.number({ invalid_type_error: 'Required' }).int().positive('Required'),
+  aspect:   z.coerce.number({ invalid_type_error: 'Required' }).int().positive('Required'),
+  diameter: z.coerce.number({ invalid_type_error: 'Required' }).int().positive('Required'),
+  cost:     z.coerce.number({ invalid_type_error: 'Required' }).positive('Required'),
+  price:    z.coerce.number({ invalid_type_error: 'Required' }).positive('Required'),
 })
 type AddFormData = z.infer<typeof addSchema>
 
@@ -82,8 +79,7 @@ export default function ScanPage() {
   const [cameraOk,    setCameraOk]    = useState(false)
   const [lastResult,  setLastResult]  = useState<ScanResult | null>(null)
   const [recentScans, setRecentScans] = useState<ScanResult[]>([])
-  const [cooldown,    setCooldown]    = useState(false)
-  const [containers,  setContainers]  = useState<Container[]>([])
+  const [cooldown,     setCooldown]    = useState(false)
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [pendingBarcode, setPendingBarcode] = useState('')
   const [creating,    setCreating]    = useState(false)
@@ -117,13 +113,6 @@ export default function ScanPage() {
     }
   }, [])
 
-  useEffect(() => {
-    fetch('/api/admin/containers')
-      .then((r) => r.json())
-      .then(setContainers)
-      .catch(() => {})
-  }, [])
-
   const activeQty = customQty ? parseInt(customQty) || 1 : qty
 
   const processScannedValue = useCallback(
@@ -144,7 +133,7 @@ export default function ScanPage() {
         // Unknown barcode → open quick-add modal instead of showing a failure
         if (res.status === 404 && !data.tire) {
           setPendingBarcode(trimmed)
-          addForm.reset({ brand: '', model: '', containerId: '' })
+          addForm.reset({ brand: '', model: '' })
           setAddModalOpen(true)
           setInputValue('')
           return
@@ -200,9 +189,8 @@ export default function ScanPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
-          sku:         pendingBarcode || null,
-          quantity:    0,
-          containerId: data.containerId || null,
+          sku:      pendingBarcode || null,
+          quantity: 0,
         }),
       })
 
@@ -679,20 +667,6 @@ export default function ScanPage() {
                     {addErrors.diameter && <p className="text-red-500 text-xs">{addErrors.diameter.message}</p>}
                   </div>
                 </div>
-              </div>
-
-              {/* Container */}
-              <div>
-                <label className="admin-label">
-                  <Package size={12} className="inline mr-1 text-blue-500" />
-                  Container (Location)
-                </label>
-                <select {...addForm.register('containerId')} className="admin-input">
-                  <option value="">No container</option>
-                  {containers.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
               </div>
 
               {/* Cost + Price */}

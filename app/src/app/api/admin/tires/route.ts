@@ -13,27 +13,20 @@ const nullableText = (max: number) =>
     return trimmed.length > 0 ? trimmed : null
   })
 
-const tireInclude = {
-  container: {
-    select: {
-      id: true,
-      name: true,
-    },
-  },
-} satisfies Prisma.TireInclude
-
 const schema = z.object({
-  sku:         nullableText(100),
-  brand:       z.string().min(1).max(100),
-  model:       z.string().min(1).max(100),
-  width:       z.coerce.number().int().positive(),
-  aspect:      z.coerce.number().int().positive(),
-  diameter:    z.coerce.number().int().positive(),
+  sku:      nullableText(100),
+  brand:    z.string().min(1).max(100),
+  model:    z.string().min(1).max(100),
+  width:    z.coerce.number().int().positive(),
+  aspect:   z.coerce.number().int().positive(),
+  diameter: z.coerce.number().int().positive(),
   quantity:    z.coerce.number().int().min(0),
+  allocSets:   z.coerce.number().int().min(0).optional().nullable(),
+  allocPairs:  z.coerce.number().int().min(0).optional().nullable(),
+  allocSingles: z.coerce.number().int().min(0).optional().nullable(),
   cost:        z.coerce.number().positive(),
   price:       z.coerce.number().positive(),
   notes:       nullableText(500),
-  containerId: nullableText(100),
 })
 
 async function requireAuth() {
@@ -71,7 +64,6 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const tires = await prisma.tire.findMany({
-    include: tireInclude,
     orderBy: [{ brand: 'asc' }, { model: 'asc' }],
   })
   return NextResponse.json(tires)
@@ -102,7 +94,6 @@ export async function POST(req: NextRequest) {
 
     const tire = await prisma.tire.create({
       data: body,
-      include: tireInclude,
     })
     return NextResponse.json(tire, { status: 201 })
   } catch (err) {
