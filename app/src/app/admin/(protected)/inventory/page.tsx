@@ -49,10 +49,12 @@ type FormData = z.infer<typeof schema>
 type StockFilter = 'all' | 'in-stock' | 'low' | 'out' | 'single' | 'pair' | 'set'
 
 function parseSizeQuery(q: string): { width?: number; aspect?: number; diameter?: number } {
-  const clean = q.replace(/[rR]/g, ' ').replace(/[/,]/g, ' ').trim()
+  // compact: "22565R17" or "2256517"
+  const compact = q.trim().match(/^(\d{3})(\d{2})[rR]?(\d{2})$/)
+  if (compact) return { width: Number(compact[1]), aspect: Number(compact[2]), diameter: Number(compact[3]) }
+  const clean = q.replace(/[-rR]/g, ' ').replace(/[/,]/g, ' ').trim()
   const parts = clean.split(/\s+/).map(Number).filter((n) => !isNaN(n) && n > 0)
   if (parts.length === 3) return { width: parts[0], aspect: parts[1], diameter: parts[2] }
-  if (parts.length === 2) return { width: parts[0], diameter: parts[1] }
   return {}
 }
 
@@ -120,10 +122,12 @@ export default function InventoryPage() {
       )
     }
     const q = search.toLowerCase()
+    const sizeStr = `${t.width}/${t.aspect}r${t.diameter}`
     return (
       (t.sku ?? '').toLowerCase().includes(q) ||
       t.brand.toLowerCase().includes(q)       ||
-      t.model.toLowerCase().includes(q)
+      t.model.toLowerCase().includes(q)       ||
+      sizeStr.includes(q.replace(/[rR]/g, 'r'))
     )
   })
 
