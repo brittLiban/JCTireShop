@@ -131,6 +131,22 @@ enum ImportStatus {
   FAILED
 }
 
+model GeneralExpense {
+  id          String   @id @default(cuid())
+  name        String
+  category    String   @default("OTHER")
+  amount      Decimal  @db.Decimal(10, 2)
+  isRecurring Boolean  @default(false)
+  recurDay    Int?
+  notes       String?
+  paidAt      DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isRecurring])
+  @@index([paidAt])
+}
+
 model Employee {
   id         String         @id @default(cuid())
   name       String
