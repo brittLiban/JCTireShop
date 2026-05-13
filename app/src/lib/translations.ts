@@ -2,7 +2,7 @@ export const translations = {
   en: {
     nav: {
       announcement: 'Serving Kent, WA — Same-day service available | Se Habla Español',
-      tagline: 'Fair Prices · Fast Service · Kent, WA',
+      tagline: 'Family Business · Fast Service · Kent, WA',
       services: 'Services',
       reviews: 'Reviews',
       book: 'Get a Quote',
@@ -122,7 +122,7 @@ export const translations = {
   es: {
     nav: {
       announcement: 'Sirviendo Kent, WA — Servicio el mismo día disponible | Se Habla Español',
-      tagline: 'Precios Justos · Servicio Rápido · Kent, WA',
+      tagline: 'Negocio Familiar · Servicio Rápido · Kent, WA',
       services: 'Servicios',
       reviews: 'Reseñas',
       book: 'Cotización',
