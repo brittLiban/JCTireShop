@@ -58,7 +58,7 @@ export const translations = {
         },
         {
           title: 'TPMS Sensor Service',
-          description: 'Tire pressure sensor reset, repair, and replacement — so that yellow warning light on your dashboard stays off after new tires.',
+          description: 'TPMS sensors (Tire Pressure Monitoring System sensors) track the air pressure inside your car tires. Sensor Replacement: If a sensor battery dies or the unit is broken, replacements vary by vehicle type.',
         },
       ],
       ctaTitle: 'No appointment needed — just show up!',
@@ -182,7 +182,7 @@ export const translations = {
         },
         {
           title: 'Servicio de Sensores TPMS',
-          description: 'Reinicio, reparación y reemplazo de sensores de presión — para que esa luz amarilla del tablero no se prenda después de sus llantas nuevas.',
+          description: 'Los sensores TPMS (Sistema de Monitoreo de Presión de Llantas) miden la presión del aire dentro de las llantas de su vehículo. Reemplazo de Sensores: Si la batería del sensor se agota o la unidad está dañada, el reemplazo varía según el tipo de vehículo.',
         },
       ],
       ctaTitle: '¡Sin cita previa — solo llegue!',
