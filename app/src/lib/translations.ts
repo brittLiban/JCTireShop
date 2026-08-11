@@ -56,6 +56,10 @@ export const translations = {
           title: 'Rotation & Air Check',
           description: 'Regular rotation extends tire life and keeps wear even. We also top off air and do free inspections with every visit.',
         },
+        {
+          title: 'TPMS Sensor Service',
+          description: 'Tire pressure sensor reset, repair, and replacement — so that yellow warning light on your dashboard stays off after new tires.',
+        },
       ],
       ctaTitle: 'No appointment needed — just show up!',
       ctaSub: 'Walk-ins always welcome. Call us or drop by at 208 Central Ave S, Kent WA.',
@@ -175,6 +179,10 @@ export const translations = {
         {
           title: 'Rotación e Inspección de Aire',
           description: 'La rotación regular extiende la vida de sus llantas. También revisamos el aire e inspeccionamos gratis.',
+        },
+        {
+          title: 'Servicio de Sensores TPMS',
+          description: 'Reinicio, reparación y reemplazo de sensores de presión — para que esa luz amarilla del tablero no se prenda después de sus llantas nuevas.',
         },
       ],
       ctaTitle: '¡Sin cita previa — solo llegue!',

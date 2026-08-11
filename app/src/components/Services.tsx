@@ -2,12 +2,12 @@
 
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
-import { Wrench, RotateCcw, Gauge, Search, ShieldCheck, Zap } from 'lucide-react'
+import { Wrench, RotateCcw, Gauge, Search, ShieldCheck, Zap, AlertTriangle } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { translations } from '@/lib/translations'
 
-const icons = [Wrench, RotateCcw, Gauge, Search, ShieldCheck, Zap]
-const nums = ['01', '02', '03', '04', '05', '06']
+const icons = [Wrench, RotateCcw, Gauge, Search, ShieldCheck, Zap, AlertTriangle]
+const nums = ['01', '02', '03', '04', '05', '06', '07']
 
 function ServiceCard({ title, description, icon: Icon, num, index }: {
   title: string
@@ -76,7 +76,8 @@ export default function Services() {
         </motion.div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* If the last card is alone on its row, center it instead of leaving a gap */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:[&>*:last-child:nth-child(3n+1)]:col-start-2">
           {t.items.map((item, i) => (
             <ServiceCard
               key={i}

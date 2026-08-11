@@ -79,6 +79,7 @@ export default function StructuredData() {
             { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'New Rims' } },
             { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'All Terrain Tires' } },
             { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Air Check & Inspection' } },
+            { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'TPMS Sensor Service' } },
           ],
         },
         review: [

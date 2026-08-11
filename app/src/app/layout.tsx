@@ -47,6 +47,7 @@ export const metadata: Metadata = {
     'new rims Kent WA',
     'walk in tire shop Kent',
     'same day tire service Kent WA',
+    'TPMS sensor Kent WA',
     // Spanish — local
     'llantería Kent WA',
     'llantas Kent Washington',
@@ -61,6 +62,7 @@ export const metadata: Metadata = {
     'rines nuevos Kent WA',
     'servicio de llantas Kent Washington',
     'llantas con garantía Kent WA',
+    'sensor de presión de llantas Kent WA',
   ],
 
   authors: [{ name: BUSINESS_NAME, url: SITE_URL }],
