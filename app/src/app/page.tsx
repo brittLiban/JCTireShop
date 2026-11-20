@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
+import BlackFridayPromo from '@/components/BlackFridayPromo'
 import Services from '@/components/Services'
 import SnapFinance from '@/components/SnapFinance'
 import Gallery from '@/components/Gallery'
@@ -18,6 +19,7 @@ export default async function HomePage() {
       <Navbar />
       <main>
         <Hero />
+        <BlackFridayPromo />
         <Gallery />
         <Services />
         <SnapFinance />
