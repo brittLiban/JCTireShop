@@ -1,0 +1,58 @@
+name: Promo release
+
+# One-shot: at 07:00 UTC on Nov 21 2026 (23:00 PT on Nov 20, before the promo's own
+# 00:00 PT start) merge the black-friday-promo branch into main and run the normal,
+# CI-gated Deploy workflow. The promo section hides itself until 11/21 and after 11/30,
+# so no further action is needed on either date.
+#
+# To cancel: disable this workflow in the Actions tab, or delete the branch.
+on:
+  schedule:
+    - cron: "0 7 21 11 *"
+  workflow_dispatch:
+
+permissions:
+  contents: write   # push the merge to main
+  actions: write    # dispatch the Deploy workflow (pushes made with GITHUB_TOKEN don't trigger it)
+
+concurrency:
+  group: promo-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Merge promo branch into main
+        id: merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ "$(date -u +%Y)" != "2026" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "Not 2026 - nothing to do."; echo "go=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if ! git fetch origin black-friday-promo; then
+            echo "::warning::black-friday-promo branch not found - nothing merged, nothing deployed."
+            echo "go=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if git merge-base --is-ancestor origin/black-friday-promo HEAD; then
+            echo "Promo already in main - nothing to merge."; echo "go=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git merge --no-ff origin/black-friday-promo -m "Release Black Friday promo (scheduled)"
+          git push origin HEAD:main
+          echo "go=true" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy (CI-gated, health-checked)
+        if: steps.merge.outputs.go == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main
