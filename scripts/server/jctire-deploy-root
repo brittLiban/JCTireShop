@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# Root-side deploy for JC Tire Shop. Touches ONLY the `app` service of compose
+# project `jctireshop`. Never touches postgres, the internal nginx, the volume,
+# .env, the central proxy, or any other site.
+#   deploy <sha>   image arrives gzip'd on stdin (docker save | gzip)
+#   rollback       swap back to the previous release
+set -uo pipefail
+
+PROJECT=jctireshop
+DIR=/root/jctireshop
+COMPOSE=(docker compose -p "$PROJECT" -f "$DIR/docker-compose.prod.yml")
+STATE=/var/lib/jctire-deploy
+BACKUPS=/var/backups/jctireshop
+LOG=/var/log/jctire-deploy.log
+IMG=jctireshop-app
+HOSTHDR=jctiresshop.com
+
+say() { echo "$(date -u '+%F %T') $*" | tee -a "$LOG" >&2; }
+die() { say "ERROR: $*"; exit 1; }
+
+[[ $EUID -eq 0 ]] || die "must run as root via sudo"
+install -d -m 700 "$STATE" "$BACKUPS"
+
+exec 9>/var/run/jctire-deploy.lock
+flock -n 9 || die "another deploy is running"
+
+health_public() {  # real path: client -> proxy-nginx -> jctireshop-nginx -> app
+  curl -sk -o /dev/null -m 8 -w '%{http_code}' --resolve "$HOSTHDR:443:127.0.0.1" "https://$HOSTHDR/"
+}
+
+swap_to() {  # swap_to <tag>: replace ONLY app, re-resolve upstream, verify
+  local tag="$1"
+  APP_TAG="$tag" "${COMPOSE[@]}" up -d --no-deps --no-build app >>"$LOG" 2>&1 || return 1
+  # internal nginx resolved `app` at start; new container => new IP => reload
+  for _ in $(seq 1 90); do
+    docker exec jctireshop-nginx-1 wget -qO- -T 2 http://app:3000/api/health >/dev/null 2>&1 \
+      || { sleep 1; continue; }
+    break
+  done
+  docker exec jctireshop-nginx-1 nginx -s reload >>"$LOG" 2>&1 || return 1
+  local ok=0
+  for _ in $(seq 1 30); do
+    [[ "$(health_public)" == "200" ]] && ok=$((ok+1)) || ok=0
+    [[ $ok -ge 3 ]] && return 0
+    sleep 2
+  done
+  return 1
+}
+
+current() { cat "$STATE/current" 2>/dev/null || true; }
+previous() { cat "$STATE/previous" 2>/dev/null || true; }
+
+# First ever run: pin what is live right now as 'baseline' so it can be rolled back to.
+if ! docker image inspect "$IMG:baseline" >/dev/null 2>&1 && [[ -z "$(current)" ]]; then
+  running=$(docker inspect -f '{{.Image}}' jctireshop-app-1 2>/dev/null || true)
+  [[ -n "$running" ]] && docker tag "$running" "$IMG:baseline" && echo baseline > "$STATE/current" \
+    && say "pinned currently-running image as $IMG:baseline"
+fi
+
+action="${1:-}"
+case "$action" in
+  deploy)
+    sha="${2:-}"; [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || die "bad sha"
+    prev="$(current)"
+    say "=== deploy $sha (previous: ${prev:-none}) ==="
+
+    # 1. Receive image (stdin). Old app keeps serving meanwhile.
+    gunzip -c | docker load >>"$LOG" 2>&1 || die "docker load failed — site untouched"
+    docker image inspect "$IMG:$sha" >/dev/null 2>&1 || die "image $IMG:$sha not present after load — site untouched"
+
+    # 1b. Keep the server checkout (compose file, internal nginx conf) in step with main.
+    git -c safe.directory="$DIR" -C "$DIR" pull --ff-only >>"$LOG" 2>&1 || die "git pull --ff-only failed in $DIR — site untouched"
+    grep -q 'APP_TAG' "$DIR/docker-compose.prod.yml" || die "compose file has no APP_TAG — refusing to deploy (would not use the new image)"
+
+    # 2. Safety dump (db push --accept-data-loss runs on start). Abort if it fails.
+    dump="$BACKUPS/pre-${sha:0:12}-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
+    ( umask 077
+      docker exec jctireshop-postgres-1 sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' | gzip > "$dump" )
+    [[ -s "$dump" ]] && gzip -t "$dump" || { rm -f "$dump"; die "pre-deploy pg_dump failed — site untouched"; }
+    say "  db dump: $dump ($(stat -c%s "$dump") bytes)"
+    ls -1t "$BACKUPS"/pre-*.sql.gz 2>/dev/null | tail -n +15 | xargs -r rm -f
+
+    # 3. Swap app only.
+    if swap_to "$sha"; then
+      docker tag "$IMG:$sha" "$IMG:latest"
+      [[ -n "$prev" ]] && echo "$prev" > "$STATE/previous"
+      echo "$sha" > "$STATE/current"
+      say "  DEPLOYED $sha — public / is HTTP 200"
+      # keep newest 5 sha-tagged images + current + previous
+      keep="$sha $(previous)"
+      docker images "$IMG" --format '{{.Tag}}' | grep -E '^[0-9a-f]{40}$' | tail -n +6 \
+        | grep -vxF -e "$sha" -e "$(previous)" | xargs -r -I{} docker rmi "$IMG:{}" >/dev/null 2>&1
+      exit 0
+    fi
+    say "  VERIFY FAILED — rolling back to ${prev:-baseline}"
+    back="${prev:-baseline}"
+    if swap_to "$back"; then say "  rolled back to $back — site healthy"; else say "  ROLLBACK ALSO FAILED — manual attention needed"; fi
+    exit 1
+    ;;
+
+  rollback)
+    prev="$(previous)"; cur="$(current)"
+    [[ -n "$prev" ]] || die "no previous release recorded"
+    docker image inspect "$IMG:$prev" >/dev/null 2>&1 || die "previous image $IMG:$prev no longer on disk"
+    say "=== rollback $cur -> $prev ==="
+    if swap_to "$prev"; then
+      docker tag "$IMG:$prev" "$IMG:latest"
+      echo "$prev" > "$STATE/current"; echo "$cur" > "$STATE/previous"
+      say "  ROLLED BACK to $prev"; exit 0
+    fi
+    say "  rollback verify failed"; exit 1
+    ;;
+  *) die "usage: deploy <sha> | rollback" ;;
+esac

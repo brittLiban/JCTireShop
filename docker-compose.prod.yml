@@ -2,6 +2,9 @@ version: '3.8'
 
 services:
   app:
+    # Deploys pass APP_TAG=<git sha> (see scripts/server/jctire-deploy-root).
+    # Default 'latest' keeps manual `docker compose up` working as before.
+    image: jctireshop-app:${APP_TAG:-latest}
     build: ./app
     restart: unless-stopped
     env_file: .env

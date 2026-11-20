@@ -1,0 +1,51 @@
+name: Deploy
+
+# Every push to main goes live. Manual "Run workflow" with rollback=true undoes the last deploy.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      rollback:
+        description: "Roll back to the previous release instead of deploying"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# One deploy at a time; a newer push waits for the running one instead of cutting it off.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          printf 'Host prod\n  HostName %s\n  User deploy\n  IdentityFile ~/.ssh/id_deploy\n  IdentitiesOnly yes\n  StrictHostKeyChecking yes\n  ServerAliveInterval 30\n' "$DEPLOY_HOST" > ~/.ssh/config
+
+      - name: Roll back
+        if: inputs.rollback
+        run: ssh prod rollback
+
+      - name: Build, ship, deploy
+        if: "!inputs.rollback"
+        run: |
+          set -euo pipefail
+          SHA=$(git rev-parse HEAD)
+          docker build -t "jctireshop-app:${SHA}" app     # a broken build stops here; live site untouched
+          docker save "jctireshop-app:${SHA}" | gzip -1 | ssh prod "deploy ${SHA}"
