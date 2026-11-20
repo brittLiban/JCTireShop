@@ -49,7 +49,7 @@ export default function BlackFridayPromo() {
   const t = copy[lang]
 
   return (
-    <section id="black-friday" className="bg-brand-yellow py-10 sm:py-14">
+    <section id="black-friday" className="bg-brand-yellow pt-36 sm:pt-44 pb-10 sm:pb-14">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-8 md:gap-12">
         <div className="w-full max-w-md md:max-w-sm lg:max-w-md flex-shrink-0 rounded-3xl overflow-hidden shadow-2xl ring-4 ring-black/10">
           <Image
@@ -67,7 +67,7 @@ export default function BlackFridayPromo() {
             {t.tag}
           </span>
           <h2 className="mt-4 text-4xl sm:text-5xl font-black leading-tight tracking-tight">{t.headline}</h2>
-          <p className="mt-2 text-xl font-bold text-red-700">{t.dates}</p>
+          <p className="mt-3 text-3xl sm:text-4xl font-black text-red-600 tracking-tight">{t.dates}</p>
           <p className="mt-4 text-lg font-medium max-w-md">{t.note}</p>
           <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
             <a

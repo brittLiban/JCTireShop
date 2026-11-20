@@ -18,8 +18,8 @@ export default async function HomePage() {
       <StructuredData />
       <Navbar />
       <main>
-        <Hero />
         <BlackFridayPromo />
+        <Hero />
         <Gallery />
         <Services />
         <SnapFinance />
